@@ -1,103 +1,150 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchProductById } from '../services/productService';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { fetchProductById, fetchProducts } from '../services/productService';
 import { Product } from '../types/product';
+import { useInquiry } from '../contexts/InquiryContext';
+import { ChevronLeft, ShoppingCart, MessageCircle, Phone, Package, Shield, Truck } from 'lucide-react';
 
 function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addItem } = useInquiry();
   const [product, setProduct] = useState<Product | null>(null);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     if (!id) return;
-    fetchProductById(id).then(setProduct).catch(console.error);
+    fetchProductById(id).then((p) => {
+      setProduct(p);
+      setSelectedImage(0);
+      fetchProducts().then((all) => setRelated(all.filter((r) => r.category === p.category && r._id !== p._id).slice(0, 4))).catch(() => {});
+    }).catch(console.error);
   }, [id]);
 
   if (!product) {
-    return <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">Loading product...</div>;
+    return (
+      <div className="pt-24 min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-soft">Loading...</div>
+      </div>
+    );
   }
 
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-8">
-          <div className="rounded-[1.75rem] bg-white p-6 ring-1 ring-slate-200/70 shadow-soft">
-            <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
-              <div className="aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-slate-100">
-                <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
-              </div>
-              <div className="space-y-4">
-                <h1 className="text-3xl font-semibold text-charcoal">{product.name}</h1>
-                <p className="text-sm uppercase tracking-[0.24em] text-slate-400">{product.category} · {product.brand}</p>
-                <p className="text-2xl font-semibold text-charcoal">KSh {product.price.toLocaleString()}</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button onClick={() => navigate('/inquiry-list')} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600">Add to Inquiry</button>
-                  <a href={`https://wa.me/${product.sellerWhatsapp}`} target="_blank" rel="noreferrer" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 text-center transition hover:bg-slate-50">Contact the seller</a>
-                </div>
-              </div>
-            </div>
-          </div>
+  const discounted = product.discount ? Math.round(product.price * (1 - product.discount / 100)) : null;
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[1.75rem] bg-white p-6 ring-1 ring-slate-200/70 shadow-soft">
-              <h2 className="text-xl font-semibold text-charcoal">Overview</h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{product.description}</p>
-              <div className="mt-6 space-y-3">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between border-b border-slate-100 py-3">
-                    <span className="text-sm text-slate-500">{key}</span>
-                    <span className="text-sm font-medium text-charcoal">{value}</span>
-                  </div>
+  return (
+    <div className="pt-20 min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
+          <ChevronLeft size={16} /> Back
+        </button>
+
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* GALLERY */}
+          <div className="space-y-4">
+            <div className="aspect-[4/3] rounded-2xl bg-slate-50 overflow-hidden">
+              <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-cover" />
+            </div>
+            {product.images.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {product.images.map((img, i) => (
+                  <button key={i} onClick={() => setSelectedImage(i)}
+                    className={`w-20 h-20 rounded-xl overflow-hidden border-2 flex-shrink-0 transition ${selectedImage === i ? 'border-primary' : 'border-transparent'}`}>
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* DETAILS */}
+          <div className="lg:sticky lg:top-28 lg:self-start space-y-8">
+            <div className="space-y-4">
+              <p className="text-sm font-medium text-primary uppercase tracking-wider">{product.brand} &middot; {product.category}</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-charcoal leading-tight">{product.name}</h1>
+              <div className="flex items-center gap-3">
+                {discounted ? (
+                  <>
+                    <span className="text-3xl font-bold text-charcoal">KSh {discounted.toLocaleString()}</span>
+                    <span className="text-xl text-soft line-through">KSh {product.price.toLocaleString()}</span>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-600">{product.discount}% OFF</span>
+                  </>
+                ) : (
+                  <span className="text-3xl font-bold text-charcoal">KSh {product.price.toLocaleString()}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-block w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                <span className="text-sm text-soft">{product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</span>
+              </div>
             </div>
 
-            <div className="rounded-[1.75rem] bg-white p-6 ring-1 ring-slate-200/70 shadow-soft">
-              <h2 className="text-xl font-semibold text-charcoal">Seller details</h2>
-              <div className="mt-6 space-y-4">
-                <div>
-                  <p className="text-sm text-slate-500">Seller</p>
-                  <p className="mt-1 text-lg font-semibold text-charcoal">{product.sellerName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Phone</p>
-                  <p className="text-lg font-semibold text-charcoal">{product.sellerPhone}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Availability</p>
-                  <p className={`text-lg font-semibold ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>{product.stock > 0 ? 'In stock' : 'Out of stock'}</p>
+            <p className="text-soft leading-relaxed">{product.description}</p>
+
+            {Object.keys(product.specifications).length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-charcoal">Specifications</h3>
+                <div className="divide-y divide-border rounded-xl border border-border">
+                  {Object.entries(product.specifications).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between px-4 py-3 text-sm">
+                      <span className="text-soft">{key}</span>
+                      <span className="font-medium text-charcoal">{value}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
+
+            <div className="space-y-3">
+              <h3 className="font-semibold text-charcoal">Seller</h3>
+              <div className="rounded-xl bg-slate-50 p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Package size={16} className="text-primary" />
+                  <span className="text-sm font-medium text-charcoal">{product.sellerName}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone size={16} className="text-soft" />
+                  <a href={`tel:${product.sellerPhone}`} className="text-sm text-soft hover:text-primary transition">{product.sellerPhone}</a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MessageCircle size={16} className="text-emerald-500" />
+                  <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-sm text-soft hover:text-emerald-600 transition">WhatsApp</a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => { addItem(product); navigate('/inquiry-list'); }}
+                className="flex-1 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                <ShoppingCart size={16} /> Add to Inquiry
+              </button>
+              <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"
+                className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
+                <MessageCircle size={16} /> WhatsApp
+              </a>
             </div>
           </div>
         </div>
 
-        <aside className="space-y-6">
-          <div className="rounded-[1.75rem] bg-white p-6 ring-1 ring-slate-200/70 shadow-soft">
-            <h2 className="text-xl font-semibold text-charcoal">Product summary</h2>
-            <div className="mt-6 space-y-4 text-sm text-slate-600">
-              <div className="flex items-center justify-between">
-                <span>Original price</span>
-                <span>KSh {product.price.toLocaleString()}</span>
-              </div>
-              {product.discount && (
-                <div className="flex items-center justify-between">
-                  <span>Discount</span>
-                  <span className="text-primary">{product.discount}%</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                <span className="font-semibold text-charcoal">Availability</span>
-                <span>{product.stock > 0 ? `${product.stock} in stock` : 'Unavailable'}</span>
-              </div>
+        {/* RELATED */}
+        {related.length > 0 && (
+          <section className="mt-20 pt-12 border-t border-border">
+            <h2 className="text-2xl font-bold text-charcoal mb-8">Related Products</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {related.map((p) => (
+                <Link key={p._id} to={`/products/${p._id}`} className="group rounded-2xl bg-background overflow-hidden animate-lift">
+                  <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="p-4 space-y-1">
+                    <h3 className="font-semibold text-charcoal text-sm">{p.name}</h3>
+                    <p className="text-sm font-bold text-charcoal">KSh {p.price.toLocaleString()}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </div>
-
-          <div className="rounded-[1.75rem] bg-white p-6 ring-1 ring-slate-200/70 shadow-soft">
-            <h2 className="text-xl font-semibold text-charcoal">Related products</h2>
-            <p className="mt-3 text-sm text-slate-500">Browse more in the same category.</p>
-          </div>
-        </aside>
+          </section>
+        )}
       </div>
     </div>
   );

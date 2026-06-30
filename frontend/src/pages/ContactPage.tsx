@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { MessageCircle, Phone, Mail } from 'lucide-react';
 
 interface SiteContent {
-  page: string;
-  title: string;
-  subtitle: string;
-  body: string;
+  page: string; title: string; subtitle: string; body: string;
   sections: { heading: string; content: string }[];
 }
 
@@ -13,7 +11,7 @@ const defaults: SiteContent = {
   page: 'contact',
   title: 'Contact us',
   subtitle: 'Reach out to discuss inquiries, pricing, or pickup arrangements.',
-  body: 'Have a question or want to follow up on an inquiry? Use any of the channels below.',
+  body: '',
   sections: [
     { heading: 'Phone', content: '0705980668' },
     { heading: 'WhatsApp', content: '0705980668' },
@@ -21,43 +19,46 @@ const defaults: SiteContent = {
   ]
 };
 
+const sectionIcons: Record<string, typeof Phone> = { Phone, WhatsApp: MessageCircle, Email: Mail };
+
 function ContactPage() {
   const [content, setContent] = useState<SiteContent>(defaults);
 
   useEffect(() => {
-    api.get<SiteContent>('/site/contact')
-      .then((res) => {
-        if (res.data.title) setContent(res.data);
-      })
-      .catch(() => {});
+    api.get<SiteContent>('/site/contact').then((res) => { if (res.data.title) setContent(res.data); }).catch(() => {});
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-      <div className="rounded-[1.5rem] bg-white p-10 shadow-soft">
-        <h1 className="text-3xl font-semibold text-charcoal">{content.title}</h1>
-        <p className="mt-4 text-slate-600">{content.subtitle}</p>
-        <p className="mt-6 text-slate-600">{content.body}</p>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {content.sections.map((section, i) => (
-            <div key={i} className="rounded-[1.25rem] border border-slate-200 p-6">
-              <h2 className="text-xl font-semibold text-charcoal">{section.heading}</h2>
-              {section.heading === 'WhatsApp' ? (
-                <a
-                  href={`https://wa.me/${section.content.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 block text-sm text-blue-600 underline"
-                >
-                  {section.content}
-                </a>
-              ) : (
-                <p className="mt-3 text-sm text-slate-600">{section.content}</p>
-              )}
-            </div>
-          ))}
+    <div className="pt-24">
+      <section className="border-b border-border bg-white">
+        <div className="mx-auto max-w-3xl px-6 py-16 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-charcoal leading-tight">{content.title}</h1>
+          <p className="mt-4 text-lg text-soft">{content.subtitle}</p>
         </div>
-      </div>
+      </section>
+      <section className="mx-auto max-w-3xl px-6 py-16">
+        <div className="grid gap-8 sm:grid-cols-3">
+          {content.sections.map((section, i) => {
+            const Icon = sectionIcons[section.heading] || Phone;
+            const isWhatsApp = section.heading === 'WhatsApp';
+            const isEmail = section.heading === 'Email';
+            const isPhone = section.heading === 'Phone';
+            const href = isWhatsApp ? `https://wa.me/${section.content.replace(/[^0-9]/g, '')}` : isEmail ? `mailto:${section.content}` : isPhone ? `tel:${section.content}` : null;
+            const Wrapper = href ? 'a' : 'div';
+
+            return (
+              <Wrapper key={i} href={href || undefined} target={isWhatsApp ? '_blank' : undefined} rel={isWhatsApp ? 'noreferrer' : undefined}
+                className="text-center p-8 rounded-2xl bg-white border border-border/60 hover:shadow-soft transition group">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform">
+                  {Icon && <Icon size={24} className="text-primary" />}
+                </div>
+                <h2 className="text-lg font-semibold text-charcoal mb-2">{section.heading}</h2>
+                <p className="text-sm text-soft">{section.content}</p>
+              </Wrapper>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

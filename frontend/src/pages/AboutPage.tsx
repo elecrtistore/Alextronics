@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { ArrowRight } from 'lucide-react';
 
 interface SiteContent {
-  page: string;
-  title: string;
-  subtitle: string;
-  body: string;
+  page: string; title: string; subtitle: string; body: string;
   sections: { heading: string; content: string }[];
 }
 
@@ -25,30 +24,33 @@ function AboutPage() {
   const [content, setContent] = useState<SiteContent>(defaults);
 
   useEffect(() => {
-    api.get<SiteContent>('/site/about')
-      .then((res) => {
-        if (res.data.title) setContent(res.data);
-      })
-      .catch(() => {});
+    api.get<SiteContent>('/site/about').then((res) => { if (res.data.title) setContent(res.data); }).catch(() => {});
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-      <div className="rounded-[1.5rem] bg-white p-10 shadow-soft">
-        <h1 className="text-3xl font-semibold text-charcoal">{content.title}</h1>
-        <p className="mt-4 text-slate-600">{content.subtitle}</p>
-        <p className="mt-6 text-slate-600">{content.body}</p>
-        {content.sections.length > 0 && (
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {content.sections.map((section, i) => (
-              <div key={i} className="rounded-[1.25rem] border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-charcoal">{section.heading}</h2>
-                <p className="mt-3 text-sm text-slate-600">{section.content}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="pt-24">
+      <section className="border-b border-border bg-white">
+        <div className="mx-auto max-w-3xl px-6 py-16 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-charcoal leading-tight">{content.title}</h1>
+          <p className="mt-4 text-lg text-soft">{content.subtitle}</p>
+        </div>
+      </section>
+      <section className="mx-auto max-w-3xl px-6 py-16">
+        <p className="text-charcoal leading-relaxed text-lg">{content.body}</p>
+        <div className="mt-12 grid gap-8 sm:grid-cols-3">
+          {content.sections.map((section, i) => (
+            <div key={i}>
+              <h2 className="text-xl font-bold text-charcoal mb-3">{section.heading}</h2>
+              <p className="text-sm text-soft leading-relaxed">{section.content}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-12 text-center">
+          <Link to="/shop" className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
+            Start shopping <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

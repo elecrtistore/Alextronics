@@ -1,23 +1,27 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useInquiry } from '../contexts/InquiryContext';
+import { CheckCircle, ArrowRight, ClipboardList } from 'lucide-react';
 
 function InquirySuccessPage() {
   const { clear } = useInquiry();
-
-  useEffect(() => {
-    clear();
-  }, [clear]);
+  useEffect(() => { clear(); }, [clear]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
-      <div className="rounded-[1.5rem] bg-white p-10 text-center shadow-soft">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-700">✓</div>
-        <h1 className="text-3xl font-semibold text-charcoal">Inquiry submitted successfully</h1>
-        <p className="mt-4 text-sm text-slate-600">Your inquiry has been sent. The seller will contact you shortly by phone or WhatsApp.</p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link to="/shop" className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600">Continue shopping</Link>
-          <Link to="/my-inquiries" className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-charcoal transition hover:bg-slate-50">View my inquiries</Link>
+    <div className="pt-24 min-h-screen flex items-center justify-center px-6">
+      <div className="text-center max-w-md space-y-6">
+        <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+          <CheckCircle size={40} className="text-emerald-600" />
+        </div>
+        <h1 className="text-3xl font-bold text-charcoal">Inquiry submitted</h1>
+        <p className="text-soft leading-relaxed">Your inquiry has been sent. The seller will contact you shortly by phone or WhatsApp.</p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+          <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
+            Continue shopping <ArrowRight size={16} />
+          </Link>
+          <Link to="/my-inquiries" className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition">
+            <ClipboardList size={16} /> My inquiries
+          </Link>
         </div>
       </div>
     </div>

@@ -349,58 +349,59 @@ function AdminDashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-white via-orange-50 to-slate-100 p-8 shadow-soft ring-1 ring-slate-200/70">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-600">Admin dashboard</p>
-            <h1 className="mt-3 text-4xl font-semibold text-charcoal">Welcome back, {user?.displayName || 'Admin'}.</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">Manage inventory, review customer inquiries, and keep product pricing up to date.</p>
+    <div className="pt-20 min-h-screen">
+      <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-10">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary">Admin dashboard</p>
+          <h1 className="mt-2 text-3xl font-bold text-charcoal">Welcome back, {user?.displayName || 'Admin'}.</h1>
+          <p className="mt-2 text-soft">Manage inventory, review inquiries, and customize site content.</p>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+          <div className="rounded-2xl bg-white border border-border/60 p-5">
+            <p className="text-sm text-soft">Products</p>
+            <p className="mt-2 text-3xl font-bold text-charcoal">{stats.totalProducts}</p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
-              <p className="text-sm text-slate-500">Products</p>
-              <p className="mt-3 text-3xl font-semibold text-charcoal">{stats.totalProducts}</p>
-            </div>
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
-              <p className="text-sm text-slate-500">Inquiries</p>
-              <p className="mt-3 text-3xl font-semibold text-charcoal">{stats.totalInquiries}</p>
-            </div>
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
-              <p className="text-sm text-slate-500">New</p>
-              <p className="mt-3 text-3xl font-semibold text-charcoal">{stats.newInquiries}</p>
-            </div>
-            <div className="rounded-[1.5rem] bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
-              <p className="text-sm text-slate-500">Sold</p>
-              <p className="mt-3 text-3xl font-semibold text-charcoal">{stats.soldItems}</p>
-            </div>
+          <div className="rounded-2xl bg-white border border-border/60 p-5">
+            <p className="text-sm text-soft">Inquiries</p>
+            <p className="mt-2 text-3xl font-bold text-charcoal">{stats.totalInquiries}</p>
+          </div>
+          <div className="rounded-2xl bg-white border border-border/60 p-5">
+            <p className="text-sm text-soft">New</p>
+            <p className="mt-2 text-3xl font-bold text-charcoal">{stats.newInquiries}</p>
+          </div>
+          <div className="rounded-2xl bg-white border border-border/60 p-5">
+            <p className="text-sm text-soft">Sold</p>
+            <p className="mt-2 text-3xl font-bold text-charcoal">{stats.soldItems}</p>
           </div>
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[300px_1fr]">
-          <aside className="space-y-4">
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
-              <h2 className="text-xl font-semibold text-charcoal">Control panel</h2>
-              <p className="mt-3 text-sm text-slate-600">Open any section to manage products, review inquiries, or tune dashboard layout.</p>
-              <div className="mt-6 space-y-3">
+        <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+          <aside className="space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-charcoal mb-4">Control panel</h2>
+              <div className="space-y-1">
                 {cards.map((card) => (
                   <button
                     key={card.id}
                     onClick={() => setActiveCard(card.id)}
-                    className={`w-full rounded-3xl px-4 py-3 text-left text-sm font-semibold transition ${
-                      activeCard === card.id ? 'bg-orange-50 text-orange-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    className={`w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
+                      activeCard === card.id ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal hover:bg-slate-50'
                     }`}
                   >
-                    {card.title}
+                    <div className="flex items-center gap-3">
+                      <span>{card.icon}</span>
+                      <span>{card.title}</span>
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
-              <h2 className="text-xl font-semibold text-charcoal">Reorder cards</h2>
-              <p className="mt-3 text-sm text-slate-600">Drag a card into position to customize the admin sidebar order.</p>
-              <div className="mt-6 space-y-3">
+            <div className="border-t border-border pt-6">
+              <h2 className="text-sm font-semibold text-charcoal mb-3">Reorder cards</h2>
+              <p className="text-xs text-soft mb-4">Drag to customize the sidebar order.</p>
+              <div className="space-y-2">
                 {cards.map((card) => (
                   <div
                     key={card.id}
@@ -408,7 +409,7 @@ function AdminDashboardPage() {
                     onDragStart={(event) => handleDragStart(event, card.id)}
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => handleDrop(event, card.id)}
-                    className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700 shadow-sm"
+                    className="rounded-xl border border-border bg-white px-4 py-3 text-sm text-charcoal shadow-sm cursor-grab"
                   >
                     <div className="flex items-center gap-3">
                       <span>{card.icon}</span>
@@ -423,7 +424,7 @@ function AdminDashboardPage() {
           <section className="space-y-6">
             {activeCard === 'products' && (
               <div className="space-y-6">
-                <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+                <div className="rounded-2xl bg-white border border-border/60 p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h2 className="text-xl font-semibold text-charcoal">Add new product</h2>
@@ -437,42 +438,42 @@ function AdminDashboardPage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Product name</span>
-                        <input value={newProduct.name} onChange={(event) => updateField('name', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                        <input value={newProduct.name} onChange={(event) => updateField('name', event.target.value)} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                       </label>
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Brand</span>
-                        <input value={newProduct.brand} onChange={(event) => updateField('brand', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                        <input value={newProduct.brand} onChange={(event) => updateField('brand', event.target.value)} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                       </label>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Category</span>
-                        <input value={newProduct.category} onChange={(event) => updateField('category', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                        <input value={newProduct.category} onChange={(event) => updateField('category', event.target.value)} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                       </label>
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Price (KSh)</span>
-                        <input type="number" value={newProduct.price} onChange={(event) => updateField('price', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                        <input type="number" value={newProduct.price} onChange={(event) => updateField('price', event.target.value)} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                       </label>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Stock quantity</span>
-                        <input type="number" value={newProduct.stock} onChange={(event) => updateField('stock', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                        <input type="number" value={newProduct.stock} onChange={(event) => updateField('stock', event.target.value)} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                       </label>
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Image URL</span>
                         <div className="mt-2 flex gap-2">
-                          <input value={newProduct.imageUrl} onChange={(event) => updateField('imageUrl', event.target.value)} placeholder="https://" className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
-                          <button type="button" onClick={addImageUrl} className="rounded-3xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Add</button>
+                          <input value={newProduct.imageUrl} onChange={(event) => updateField('imageUrl', event.target.value)} placeholder="https://" className="w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
+                          <button type="button" onClick={addImageUrl} className="rounded-xl bg-charcoal px-4 py-3 text-sm font-semibold text-white hover:bg-charcoal/90 transition hover:bg-slate-800">Add</button>
                         </div>
                       </label>
                     </div>
 
                     <label className="block">
                       <span className="text-sm font-medium text-slate-700">Description</span>
-                      <textarea value={newProduct.description} onChange={(event) => updateField('description', event.target.value)} rows={4} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                      <textarea value={newProduct.description} onChange={(event) => updateField('description', event.target.value)} rows={4} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                     </label>
 
                     {imageUrls.length > 0 && (
@@ -486,17 +487,17 @@ function AdminDashboardPage() {
                       </div>
                     )}
 
-                    <button type="submit" className="w-full rounded-[1.25rem] bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600">Create product</button>
+                    <button type="submit" className="w-full rounded-full bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600">Create product</button>
                   </form>
                 </div>
 
                 {products.length > 0 && (
-                  <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+                  <div className="rounded-2xl bg-white border border-border/60 p-6">
                     <h2 className="text-xl font-semibold text-charcoal">Product catalog</h2>
                     <p className="mt-2 text-sm text-slate-600">Review, edit, or remove products and manage images.</p>
                     <div className="mt-6 space-y-4">
                       {products.map((product) => (
-                        <div key={product._id} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                        <div key={product._id} className="rounded-xl border border-border bg-slate-50 p-4">
                           <div className="grid gap-4 md:grid-cols-[140px_minmax(0,1fr)_170px] md:items-center">
                             <img src={product.images[0]} alt={product.name} className="h-32 w-full rounded-[1.5rem] object-cover md:h-32 md:w-32" />
                             <div>
@@ -510,14 +511,14 @@ function AdminDashboardPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleEditProduct(product)}
-                                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-100"
+                                  className="rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-slate-50 transition hover:bg-blue-100"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => product.discount ? handleRemoveDiscount(product._id) : applyDiscount(product._id)}
-                                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                                  className="rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-slate-50 transition hover:bg-slate-100"
                                 >
                                   {product.discount ? `Remove discount (${product.discount}%)` : 'Add discount'}
                                 </button>
@@ -548,42 +549,42 @@ function AdminDashboardPage() {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Product name</span>
-                            <input name="name" defaultValue={editingProduct.name} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                            <input name="name" defaultValue={editingProduct.name} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                           </label>
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Brand</span>
-                            <input name="brand" defaultValue={editingProduct.brand} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                            <input name="brand" defaultValue={editingProduct.brand} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                           </label>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Category</span>
-                            <input name="category" defaultValue={editingProduct.category} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                            <input name="category" defaultValue={editingProduct.category} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                           </label>
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Price (KSh)</span>
-                            <input type="number" name="price" defaultValue={editingProduct.price} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                            <input type="number" name="price" defaultValue={editingProduct.price} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                           </label>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Stock quantity</span>
-                            <input type="number" name="stock" defaultValue={editingProduct.stock} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                            <input type="number" name="stock" defaultValue={editingProduct.stock} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                           </label>
                         </div>
 
                         <label className="block">
                           <span className="text-sm font-medium text-slate-700">Description</span>
-                          <textarea name="description" defaultValue={editingProduct.description} rows={3} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
+                          <textarea name="description" defaultValue={editingProduct.description} rows={3} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
                         </label>
 
                         <div>
                           <span className="text-sm font-medium text-slate-700">Images</span>
                           <div className="mt-2 flex gap-2">
-                            <input value={editImageInput} onChange={(e) => setEditImageInput(e.target.value)} placeholder="https://" className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none" />
-                            <button type="button" onClick={handleAddEditImage} className="rounded-3xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Add</button>
+                            <input value={editImageInput} onChange={(e) => setEditImageInput(e.target.value)} placeholder="https://" className="w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
+                            <button type="button" onClick={handleAddEditImage} className="rounded-xl bg-charcoal px-4 py-3 text-sm font-semibold text-white hover:bg-charcoal/90 transition hover:bg-slate-800">Add</button>
                           </div>
                           {editImages.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-3">
@@ -598,8 +599,8 @@ function AdminDashboardPage() {
                         </div>
 
                         <div className="flex gap-3">
-                          <button type="submit" className="flex-1 rounded-[1.25rem] bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600">Save changes</button>
-                          <button type="button" onClick={handleCancelEdit} className="rounded-[1.25rem] border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Cancel</button>
+                          <button type="submit" className="flex-1 rounded-full bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600">Save changes</button>
+                          <button type="button" onClick={handleCancelEdit} className="rounded-xl border border-border bg-white px-6 py-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Cancel</button>
                         </div>
                       </form>
                     </div>
@@ -609,7 +610,7 @@ function AdminDashboardPage() {
             )}
 
             {activeCard === 'orders' && (
-              <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+              <div className="rounded-2xl bg-white border border-border/60 p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-charcoal">Inquiries</h2>
@@ -619,7 +620,7 @@ function AdminDashboardPage() {
                 </div>
                 <div className="mt-6 space-y-4">
                   {inquiries.map((inquiry) => (
-                    <div key={inquiry._id} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-6">
+                    <div key={inquiry._id} className="rounded-2xl border border-border bg-slate-50 p-6">
                       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                           <p className="text-sm text-slate-500">Inquiry ID</p>
@@ -688,12 +689,12 @@ function AdminDashboardPage() {
             <DiscountModal open={discountModalOpen} initial={10} onClose={() => { setDiscountModalOpen(false); setDiscountTargetId(null); }} onApply={handleApplyDiscount} />
 
             {activeCard === 'layout' && (
-              <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+              <div className="rounded-2xl bg-white border border-border/60 p-6">
                 <h2 className="text-xl font-semibold text-charcoal">Page layout</h2>
                 <p className="mt-2 text-sm text-slate-600">Rearrange the admin dashboard cards and customize how these controls appear.</p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {cards.map((card) => (
-                    <div key={card.id} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                    <div key={card.id} className="rounded-xl border border-border bg-slate-50 p-5">
                       <p className="text-sm text-slate-500">{card.title}</p>
                       <p className="mt-2 text-sm text-slate-700">{card.description}</p>
                     </div>
@@ -703,15 +704,15 @@ function AdminDashboardPage() {
             )}
 
             {activeCard === 'discounts' && (
-              <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+              <div className="rounded-2xl bg-white border border-border/60 p-6">
                 <h2 className="text-xl font-semibold text-charcoal">Discount builder</h2>
                 <p className="mt-2 text-sm text-slate-600">Use the product catalog to apply percentage discounts and fine-tune pricing from the original product value.</p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                  <div className="rounded-xl border border-border bg-slate-50 p-5">
                     <p className="text-sm text-slate-500">Discounted products</p>
                     <p className="mt-2 text-2xl font-semibold text-charcoal">{products.filter((p) => p.discount && p.discount > 0).length}</p>
                   </div>
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                  <div className="rounded-xl border border-border bg-slate-50 p-5">
                     <p className="text-sm text-slate-500">Example</p>
                     <p className="mt-2 text-sm text-slate-700">A 20% discount on KSh 5,400 becomes KSh 4,320.</p>
                   </div>
@@ -720,7 +721,7 @@ function AdminDashboardPage() {
             )}
 
             {activeCard === 'site' && (
-              <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+              <div className="rounded-2xl bg-white border border-border/60 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-charcoal">Site Content</h2>
@@ -746,7 +747,7 @@ function AdminDashboardPage() {
                     <input
                       value={sitePages[sitePage]?.title || ''}
                       onChange={(e) => updateSiteField('title', e.target.value)}
-                      className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                      className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                     />
                   </label>
                   <label className="block">
@@ -754,7 +755,7 @@ function AdminDashboardPage() {
                     <input
                       value={sitePages[sitePage]?.subtitle || ''}
                       onChange={(e) => updateSiteField('subtitle', e.target.value)}
-                      className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                      className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                     />
                   </label>
                   <label className="block">
@@ -763,7 +764,7 @@ function AdminDashboardPage() {
                       value={sitePages[sitePage]?.body || ''}
                       onChange={(e) => updateSiteField('body', e.target.value)}
                       rows={4}
-                      className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                      className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                     />
                   </label>
                   <div>
@@ -774,13 +775,13 @@ function AdminDashboardPage() {
                           value={section.heading}
                           onChange={(e) => updateSiteSection(i, 'heading', e.target.value)}
                           placeholder="Heading"
-                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                          className="rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                         />
                         <input
                           value={section.content}
                           onChange={(e) => updateSiteSection(i, 'content', e.target.value)}
                           placeholder="Content"
-                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                          className="rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                         />
                         <button
                           type="button"
@@ -794,7 +795,7 @@ function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={addSiteSection}
-                      className="mt-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                      className="mt-3 rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-slate-50 hover:bg-slate-50"
                     >
                       Add section
                     </button>
@@ -808,13 +809,13 @@ function AdminDashboardPage() {
                           value={key}
                           onChange={(e) => updateSiteMetaKey(i, e.target.value)}
                           placeholder="Key"
-                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                          className="rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                         />
                         <input
                           value={value}
                           onChange={(e) => updateSiteMetaValue(i, e.target.value)}
                           placeholder="Value"
-                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                          className="rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                         />
                         <button
                           type="button"
@@ -828,7 +829,7 @@ function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={addSiteMeta}
-                      className="mt-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                      className="mt-3 rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-slate-50 hover:bg-slate-50"
                     >
                       Add meta
                     </button>
@@ -839,14 +840,14 @@ function AdminDashboardPage() {
                       type="button"
                       disabled={savingSite}
                       onClick={handleSaveSite}
-                      className="flex-1 rounded-[1.25rem] bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
+                      className="flex-1 rounded-full bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
                     >
                       {savingSite ? 'Saving…' : 'Save changes'}
                     </button>
                     <button
                       type="button"
                       onClick={handleDeletePage}
-                      className="rounded-[1.25rem] border border-rose-200 bg-white px-6 py-4 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                      className="rounded-xl border border-red-200 bg-white px-6 py-4 text-sm font-semibold text-rose-600 hover:bg-rose-50"
                     >
                       Delete page
                     </button>
@@ -861,13 +862,13 @@ function AdminDashboardPage() {
                       value={newPageName}
                       onChange={(e) => setNewPageName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                       placeholder="page-name"
-                      className="flex-1 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                      className="flex-1 rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
                     />
                     <button
                       type="button"
                       disabled={!newPageName}
                       onClick={handleCreatePage}
-                      className="rounded-3xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+                      className="rounded-xl bg-charcoal px-6 py-3 text-sm font-semibold text-white hover:bg-charcoal/90 transition hover:bg-slate-800 disabled:opacity-50"
                     >
                       Create
                     </button>

@@ -1,93 +1,86 @@
 import { useEffect, useState } from 'react';
 import { Inquiry } from '../types/inquiry';
 import { fetchInquiries } from '../services/inquiryService';
+import { ClipboardList, Package, Clock } from 'lucide-react';
 
 function MyInquiriesPage() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchInquiries()
-      .then(setInquiries)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    fetchInquiries().then(setInquiries).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-10 text-center text-slate-500 sm:px-6 lg:px-8">
-        Loading inquiries…
-      </div>
-    );
-  }
+  if (loading) return <div className="pt-24 min-h-screen flex items-center justify-center"><div className="animate-pulse text-soft">Loading...</div></div>;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-charcoal">My inquiries</h1>
-          <p className="mt-2 text-sm text-slate-600">Track your inquiry status and review details for each request.</p>
+    <div className="pt-24 min-h-screen">
+      <div className="mx-auto max-w-4xl px-6 py-12">
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-charcoal">My Inquiries</h1>
+          <p className="mt-2 text-sm text-soft">Track your inquiry status and review details for each request.</p>
         </div>
-      </div>
 
-      {inquiries.length === 0 ? (
-        <div className="mt-8 rounded-[1.5rem] bg-white p-10 text-center shadow-soft">
-          <p className="text-slate-500">You haven't submitted any inquiries yet.</p>
-        </div>
-      ) : (
-        <div className="mt-8 space-y-6">
-          {inquiries.map((inquiry) => (
-            <div key={inquiry._id} className="rounded-[1.5rem] bg-white p-6 shadow-soft">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Inquiry ID</p>
-                  <p className="mt-1 text-lg font-semibold text-charcoal">{inquiry._id}</p>
+        {inquiries.length === 0 ? (
+          <div className="text-center py-20 space-y-4">
+            <ClipboardList size={48} className="text-soft mx-auto" />
+            <p className="text-soft">You haven't submitted any inquiries yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {inquiries.map((inquiry) => (
+              <div key={inquiry._id} className="rounded-2xl bg-white border border-border/60 p-6 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Package size={18} className="text-primary" />
+                    <span className="text-sm font-mono text-soft">{inquiry._id.slice(-8)}</span>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-4 py-1.5 text-xs font-semibold text-charcoal">{inquiry.status}</span>
                 </div>
-                <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">{inquiry.status}</div>
-              </div>
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
-                <div>
-                  <p className="text-sm text-slate-500">Customer</p>
-                  <p className="mt-1 text-sm font-semibold text-charcoal">{inquiry.customer.name}</p>
-                  <p className="text-sm text-slate-500">{inquiry.customer.phone}</p>
+                <div className="grid sm:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-soft">Customer</p>
+                    <p className="font-semibold text-charcoal mt-1">{inquiry.customer.name}</p>
+                    <p className="text-soft">{inquiry.customer.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-soft">Location</p>
+                    <p className="font-semibold text-charcoal mt-1">{inquiry.customer.county || 'N/A'}{inquiry.customer.town ? `, ${inquiry.customer.town}` : ''}</p>
+                  </div>
+                  <div>
+                    <p className="text-soft flex items-center gap-1"><Clock size={14} /> Submitted</p>
+                    <p className="font-semibold text-charcoal mt-1">{new Date(inquiry.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500">Location</p>
-                  <p className="mt-1 text-sm font-semibold text-charcoal">{inquiry.customer.county}, {inquiry.customer.town}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Submitted</p>
-                  <p className="mt-1 text-sm font-semibold text-charcoal">{new Date(inquiry.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-              <div className="mt-6 overflow-x-auto">
-                <table className="min-w-full text-left text-sm text-slate-600">
-                  <thead>
-                    <tr>
-                      <th className="pb-3 font-semibold text-slate-800">Product</th>
-                      <th className="pb-3 font-semibold text-slate-800">Quantity</th>
-                      <th className="pb-3 font-semibold text-slate-800">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {inquiry.items.map((item) => (
-                      <tr key={item.productId}>
-                        <td className="py-3 font-medium text-charcoal">{item.name}</td>
-                        <td className="py-3">{item.quantity}</td>
-                        <td className="py-3">KSh {item.price.toLocaleString()}</td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 font-medium text-soft">Product</th>
+                        <th className="text-left py-2 font-medium text-soft">Qty</th>
+                        <th className="text-right py-2 font-medium text-soft">Price</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {inquiry.items.map((item) => (
+                        <tr key={item.productId} className="border-b border-border/50">
+                          <td className="py-3 font-medium text-charcoal">{item.name}</td>
+                          <td className="py-3 text-soft">{item.quantity}</td>
+                          <td className="py-3 text-right font-medium text-charcoal">KSh {item.price.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <span className="text-sm text-soft">Estimated total</span>
+                  <span className="text-xl font-bold text-charcoal">KSh {inquiry.estimatedTotal.toLocaleString()}</span>
+                </div>
               </div>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-slate-600">Estimated total</p>
-                <p className="text-lg font-semibold text-charcoal">KSh {inquiry.estimatedTotal.toLocaleString()}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

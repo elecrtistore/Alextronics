@@ -3,17 +3,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#F97316',
-        charcoal: '#1F2937',
-        accent: '#10B981',
-        surface: '#ffffff',
-        background: '#F8FAFC'
+        primary: { DEFAULT: '#F97316', hover: '#EA580C', light: '#FFF7ED' },
+        charcoal: '#111827',
+        surface: '#FFFFFF',
+        background: '#F8FAFC',
+        soft: '#6B7280',
+        border: '#E5E7EB',
+        accent: '#10B981'
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif']
       },
       boxShadow: {
-        soft: '0 12px 30px rgba(15, 23, 42, 0.08)'
+        soft: '0 4px 20px rgba(15, 23, 42, 0.06)',
+        card: '0 1px 3px rgba(15, 23, 42, 0.04)'
       },
-      borderRadius: {
-        soft: '1rem'
+      spacing: {
+        18: '4.5rem',
+        88: '22rem'
       }
     }
   },

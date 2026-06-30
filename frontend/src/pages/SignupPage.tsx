@@ -1,146 +1,94 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { UserPlus, Mail, Lock, User, Shield } from 'lucide-react';
 
 function SignupPage() {
   const { signupWithRole } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [role, setRole] = useState<'Buyer' | 'Admin'>('Buyer');
-  const [adminCode, setAdminCode] = useState('');
+  const [form, setForm] = useState({ displayName: '', email: '', password: '', role: 'Buyer' as 'Buyer' | 'Admin', adminCode: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError('');
-
-    if (password !== confirm) {
-      setError('Passwords do not match.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-    if (role === 'Admin' && !adminCode.trim()) {
-      setError('Enter the admin code to create an admin account.');
-      return;
-    }
-
-    setSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(''); setSubmitting(true);
     try {
-      await signupWithRole(email, password, role, adminCode.trim() || undefined);
+      await signupWithRole(form.email, form.password, form.role, form.role === 'Admin' ? form.adminCode : undefined);
       navigate('/shop');
     } catch (err: any) {
-      const serverMsg = err?.response?.data?.message;
-      if (serverMsg) {
-        setError(serverMsg);
-      } else {
-        const msg =
-          err.code === 'auth/email-already-in-use'
-            ? 'An account with this email already exists.'
-            : err.code === 'auth/invalid-email'
-              ? 'Please enter a valid email address.'
-              : err.code === 'auth/weak-password'
-                ? 'Password is too weak.'
-                : err.message || 'Signup failed. Please try again.';
-        setError(msg);
-      }
-    } finally {
-      setSubmitting(false);
-    }
+      setError(err.message || 'Signup failed.');
+    } finally { setSubmitting(false); }
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14 sm:px-6">
-      <div className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-orange-50 to-slate-100 p-8 shadow-soft ring-1 ring-slate-200/70">
-        <div className="rounded-[1.75rem] border border-slate-200 bg-white p-8 shadow-sm">
-          <h1 className="text-3xl font-semibold text-charcoal">Create account</h1>
-          <p className="mt-2 text-sm text-slate-600">Sign up to start browsing and submitting inquiries.</p>
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            {error && (
-              <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
-            )}
-
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Confirm password</span>
-              <input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                required
-                minLength={6}
-                className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Account type</span>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as 'Buyer' | 'Admin')}
-                className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
-              >
-                <option value="Buyer">Buyer</option>
-                <option value="Admin">Admin</option>
-              </select>
-            </label>
-
-            {role === 'Admin' && (
-              <label className="block">
-                <span className="text-sm font-medium text-slate-700">Admin code</span>
-                <input
-                  type="password"
-                  value={adminCode}
-                  onChange={(e) => setAdminCode(e.target.value)}
-                  placeholder="Enter the admin secret code"
-                  className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
-                />
-                <p className="mt-1 text-xs text-slate-500">Only one admin account can exist.</p>
-              </label>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full rounded-[1.25rem] bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
-            >
-              {submitting ? 'Creating account…' : 'Create account'}
-            </button>
-
-            <p className="text-center text-sm text-slate-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-primary">Sign in</Link>
-            </p>
-          </form>
+    <div className="pt-24 min-h-screen flex items-center justify-center px-6">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <UserPlus size={24} className="text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-charcoal">Create account</h1>
+          <p className="mt-2 text-sm text-soft">Join ElectriShop to start inquiring.</p>
         </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {error && <div className="rounded-xl bg-red-50 border border-red-200 px-5 py-3 text-sm text-red-600">{error}</div>}
+
+          <div>
+            <label className="text-sm font-medium text-charcoal">Full Name</label>
+            <div className="relative mt-2">
+              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+              <input value={form.displayName} onChange={(e) => setForm((p) => ({ ...p, displayName: e.target.value }))} required
+                className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-charcoal">Email</label>
+            <div className="relative mt-2">
+              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+              <input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required
+                className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-charcoal">Password</label>
+            <div className="relative mt-2">
+              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+              <input type="password" value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} required
+                className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-charcoal">Role</label>
+            <select value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as 'Buyer' | 'Admin' }))}
+              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm outline-none focus:border-primary transition mt-2">
+              <option value="Buyer">Buyer</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+
+          {form.role === 'Admin' && (
+            <div>
+              <label className="text-sm font-medium text-charcoal">Admin code</label>
+              <div className="relative mt-2">
+                <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+                <input type="password" value={form.adminCode} onChange={(e) => setForm((p) => ({ ...p, adminCode: e.target.value }))} required
+                  className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+              </div>
+            </div>
+          )}
+
+          <button type="submit" disabled={submitting}
+            className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50">
+            {submitting ? 'Creating account...' : 'Create account'}
+          </button>
+
+          <p className="text-center text-sm text-soft">
+            Already have an account? <Link to="/login" className="font-semibold text-primary hover:text-primary-hover">Sign in</Link>
+          </p>
+        </form>
       </div>
     </div>
   );

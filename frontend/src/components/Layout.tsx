@@ -1,109 +1,139 @@
-import { Link, NavLink } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import api from '../services/api';
 
 interface SiteContent {
-  page: string;
-  title: string;
-  subtitle: string;
-  body: string;
+  page: string; title: string; subtitle: string; body: string;
   sections: { heading: string; content: string }[];
   meta: Record<string, string>;
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [shopName, setShopName] = useState('ElectriShop');
-  const [footerContent, setFooterContent] = useState({ left: '© 2026 ElectriShop.', right: 'Browse inventory, request details, and contact us directly.' });
+  const [footerSections, setFooterSections] = useState<{ heading: string; content: string }[]>([]);
+  const [footerMeta, setFooterMeta] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    api.get<SiteContent>('/site/settings')
-      .then((res) => {
-        if (res.data.title) setShopName(res.data.title);
-      })
-      .catch(() => {});
-    api.get<SiteContent>('/site/footer')
-      .then((res) => {
-        if (res.data.title) {
-          setFooterContent({
-            left: res.data.title,
-            right: res.data.subtitle || 'Browse inventory, request details, and contact us directly.'
-          });
-        }
-      })
-      .catch(() => {});
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  return (
-    <div>
-      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link to="/" className="text-xl font-semibold tracking-tight text-charcoal">{shopName}</Link>
+  useEffect(() => {
+    api.get<SiteContent>('/site/settings').then((r) => { if (r.data.title) setShopName(r.data.title); }).catch(() => {});
+    api.get<SiteContent>('/site/footer').then((r) => {
+      if (r.data.sections) setFooterSections(r.data.sections);
+      if (r.data.meta) setFooterMeta(r.data.meta);
+    }).catch(() => {});
+  }, []);
 
-          <nav className="hidden items-center gap-6 md:flex">
-            <NavLink to="/shop" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Store</NavLink>
-            {user?.role !== 'Admin' && (
-              <NavLink to="/inquiry-list" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Inquiry Cart</NavLink>
-            )}
-            {user && (
-              <NavLink to="/my-inquiries" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>My Inquiries</NavLink>
-            )}
-            <NavLink to="/about" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>About</NavLink>
-            <NavLink to="/contact" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Contact</NavLink>
-            {user?.role === 'Admin' && (
-              <NavLink to="/admin" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Admin</NavLink>
-            )}
+  useEffect(() => { setOpen(false); }, [location]);
+
+  const isHome = location.pathname === '/' || location.pathname === '/shop';
+  const transparent = isHome && !scrolled;
+
+  const navLinks = [
+    { to: '/shop', label: 'Shop' },
+    ...(user?.role !== 'Admin' ? [{ to: '/inquiry-list', label: 'Inquiry Cart' }] : []),
+    ...(user ? [{ to: '/my-inquiries', label: 'My Inquiries' }] : []),
+    { to: '/about', label: 'About' },
+    { to: '/contact', label: 'Contact' },
+    ...(user?.role === 'Admin' ? [{ to: '/admin', label: 'Admin' }] : []),
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'
+      }`}>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <Link to="/" className={`text-xl font-bold tracking-tight transition-colors ${transparent ? 'text-white' : 'text-charcoal'}`}>
+            {shopName}
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors relative after:absolute after:bottom-[-6px] after:left-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 ${
+                    isActive
+                      ? `${transparent ? 'text-white' : 'text-charcoal'} after:w-full`
+                      : `${transparent ? 'text-white/80 hover:text-white' : 'text-soft hover:text-charcoal'} after:w-0`
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {user ? (
-              <>
-                <div className="hidden rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700 md:block">
-                  {user.displayName || user.email} · <span className="font-semibold text-charcoal">{user.role}</span>
-                </div>
-                <button onClick={logout} className="rounded-full bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800">Logout</button>
-              </>
+              <div className="flex items-center gap-3">
+                <span className={`hidden sm:block text-sm font-medium ${transparent ? 'text-white/80' : 'text-soft'}`}>
+                  {user.displayName || user.email}
+                </span>
+                <button onClick={logout} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition">
+                  Logout
+                </button>
+              </div>
             ) : (
-              <Link to="/login" className="rounded-full bg-primary px-4 py-2 text-sm text-white transition hover:bg-orange-600">Sign in</Link>
+              <Link to="/login" className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition">
+                Sign in
+              </Link>
             )}
-
-            <button
-              type="button"
-              onClick={() => setOpen((value) => !value)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 md:hidden"
-            >
-              <span className="text-xl">☰</span>
+            <button onClick={() => setOpen(!open)} className={`md:hidden p-2 rounded-full transition ${transparent ? 'text-white' : 'text-charcoal'}`}>
+              {open ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
         {open && (
-          <div className="border-t border-slate-200 bg-white md:hidden">
-            <div className="space-y-2 px-4 py-4">
-              <NavLink to="/shop" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Store</NavLink>
-              {user?.role !== 'Admin' && (
-                <NavLink to="/inquiry-list" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Inquiry Cart</NavLink>
-              )}
-              {user && (
-                <NavLink to="/my-inquiries" onClick={() => setOpen(false)} className="block text-sm text-slate-700">My Inquiries</NavLink>
-              )}
-              <NavLink to="/about" onClick={() => setOpen(false)} className="block text-sm text-slate-700">About</NavLink>
-              <NavLink to="/contact" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Contact</NavLink>
-              {user?.role === 'Admin' && (
-                <NavLink to="/admin" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Admin</NavLink>
-              )}
+          <div className="md:hidden border-t border-border bg-white">
+            <div className="px-6 py-4 space-y-3">
+              {navLinks.map((link) => (
+                <NavLink key={link.to} to={link.to} className="block text-sm font-medium text-charcoal">
+                  {link.label}
+                </NavLink>
+              ))}
             </div>
           </div>
         )}
       </header>
-      <main>{children}</main>
-      <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex flex-col gap-4 text-sm text-slate-600 md:flex-row md:items-center md:justify-between">
-            <p>{footerContent.left}</p>
-            <p>{footerContent.right}</p>
+
+      <main className="flex-1">{children}</main>
+
+      <footer className="bg-white border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-16">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <h3 className="text-lg font-bold text-charcoal">{shopName}</h3>
+              <p className="mt-3 text-sm text-soft leading-relaxed">Inquiry-first marketplace for quality electronics. Direct contact between buyers and sellers.</p>
+            </div>
+            {footerSections.map((section, i) => (
+              <div key={i}>
+                <h4 className="text-sm font-semibold text-charcoal uppercase tracking-wider">{section.heading}</h4>
+                <p className="mt-3 text-sm text-soft leading-relaxed">{section.content}</p>
+              </div>
+            ))}
+            {footerMeta.contact && (
+              <div>
+                <h4 className="text-sm font-semibold text-charcoal uppercase tracking-wider">Contact</h4>
+                <p className="mt-3 text-sm text-soft">{footerMeta.contact}</p>
+              </div>
+            )}
+          </div>
+          <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-soft">
+            <p>&copy; 2026 {shopName}. All rights reserved.</p>
+            <p>Built for direct buyer-seller connections.</p>
           </div>
         </div>
       </footer>

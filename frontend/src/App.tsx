@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { UserRole } from './types/user';
+import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import InquiryListPage from './pages/InquiryListPage';
@@ -33,7 +34,7 @@ function App() {
     <div className="min-h-screen bg-background text-charcoal">
       <Layout>
         <Routes>
-          <Route path="/" element={<Navigate to="/shop" replace />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/inquiry-list" element={<InquiryListPage />} />
