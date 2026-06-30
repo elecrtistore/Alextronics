@@ -22,10 +22,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
+app.use(cors({
+  origin: [
+    'https://elecrtistore.github.io',
+    'http://127.0.0.1:4173',
+    'http://localhost:4173',
+    'http://127.0.0.1:5000',
+    'http://localhost:5000'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+app.options('*', cors());
 app.use(helmet());
-app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Handle firebase-admin CJS/ESM interop: prefer default export if present
 const adminModule = (admin as any).default ?? admin;
