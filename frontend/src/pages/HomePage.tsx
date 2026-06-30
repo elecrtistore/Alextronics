@@ -120,7 +120,7 @@ function HomePage() {
               return (
                 <Link key={product._id} to={`/products/${product._id}`} className="group rounded-2xl bg-background overflow-hidden animate-lift">
                   <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="p-5 space-y-2">
                     <p className="text-xs font-medium text-primary uppercase tracking-wider">{product.brand}</p>

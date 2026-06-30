@@ -140,7 +140,7 @@ function ShopPage() {
                     className={`group rounded-2xl bg-white border border-border/60 overflow-hidden animate-lift ${isAdmin ? 'cursor-grab' : ''}`}
                   >
                     <Link to={`/products/${product._id}`} className="block aspect-[4/3] overflow-hidden bg-slate-50">
-                      <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500" />
                     </Link>
                     <div className="p-5 space-y-2">
                       <p className="text-xs font-medium text-primary uppercase tracking-wider">{product.brand}</p>

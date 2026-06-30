@@ -499,7 +499,7 @@ function AdminDashboardPage() {
                       {products.map((product) => (
                         <div key={product._id} className="rounded-xl border border-border bg-slate-50 p-4">
                           <div className="grid gap-4 md:grid-cols-[140px_minmax(0,1fr)_170px] md:items-center">
-                            <img src={product.images[0]} alt={product.name} className="h-32 w-full rounded-[1.5rem] object-cover md:h-32 md:w-32" />
+                            <img src={product.images[0]} alt={product.name} className="h-32 w-full rounded-xl object-contain bg-white p-2 md:h-32 md:w-32" />
                             <div>
                               <h3 className="text-lg font-semibold text-charcoal">{product.name}</h3>
                               <p className="mt-1 text-sm text-slate-500">{product.brand} · {product.category}</p>

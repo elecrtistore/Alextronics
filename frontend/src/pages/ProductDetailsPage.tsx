@@ -43,7 +43,7 @@ function ProductDetailsPage() {
           {/* GALLERY */}
           <div className="space-y-4">
             <div className="aspect-[4/3] rounded-2xl bg-slate-50 overflow-hidden">
-              <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-cover" />
+              <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-contain p-4" />
             </div>
             {product.images.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2">
@@ -134,7 +134,7 @@ function ProductDetailsPage() {
               {related.map((p) => (
                 <Link key={p._id} to={`/products/${p._id}`} className="group rounded-2xl bg-background overflow-hidden animate-lift">
                   <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="p-4 space-y-1">
                     <h3 className="font-semibold text-charcoal text-sm">{p.name}</h3>
