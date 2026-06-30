@@ -67,8 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const token = await fbUser.getIdToken();
           const profile = await fetchProfile(token);
-          storeRole(profile.role);
-          setUser(profile);
+          const storedRole = getStoredRole();
+          if (profile.role === 'Buyer' && storedRole && storedRole !== 'Buyer') {
+            storeRole(storedRole);
+            setUser({ ...profile, role: storedRole });
+          } else {
+            storeRole(profile.role);
+            setUser(profile);
+          }
         } catch {
           const storedRole = getStoredRole();
           setUser(buildFallbackProfile(fbUser, storedRole || 'Buyer'));
