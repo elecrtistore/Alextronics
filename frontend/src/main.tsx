@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
       <InquiryProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/shop">
           <App />
         </BrowserRouter>
       </InquiryProvider>
