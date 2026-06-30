@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://electrishop-api.onrender.com/api' }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://shop-pzpe.onrender.com/api' }}
 
       - name: SPA fallback
         run: cp dist/index.html dist/404.html
