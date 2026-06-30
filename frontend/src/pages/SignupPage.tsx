@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 function SignupPage() {
-  const { signup } = useAuth();
+  const { signupWithRole } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [role, setRole] = useState<'Buyer' | 'Admin'>('Buyer');
+  const [adminCode, setAdminCode] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -23,21 +25,30 @@ function SignupPage() {
       setError('Password must be at least 6 characters.');
       return;
     }
+    if (role === 'Admin' && !adminCode.trim()) {
+      setError('Enter the admin code to create an admin account.');
+      return;
+    }
 
     setSubmitting(true);
     try {
-      await signup(email, password);
+      await signupWithRole(email, password, role, adminCode.trim() || undefined);
       navigate('/shop');
     } catch (err: any) {
-      const message =
-        err.code === 'auth/email-already-in-use'
-          ? 'An account with this email already exists.'
-          : err.code === 'auth/invalid-email'
-            ? 'Please enter a valid email address.'
-            : err.code === 'auth/weak-password'
-              ? 'Password is too weak.'
-              : err.message || 'Signup failed. Please try again.';
-      setError(message);
+      const serverMsg = err?.response?.data?.message;
+      if (serverMsg) {
+        setError(serverMsg);
+      } else {
+        const msg =
+          err.code === 'auth/email-already-in-use'
+            ? 'An account with this email already exists.'
+            : err.code === 'auth/invalid-email'
+              ? 'Please enter a valid email address.'
+              : err.code === 'auth/weak-password'
+                ? 'Password is too weak.'
+                : err.message || 'Signup failed. Please try again.';
+        setError(msg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -89,6 +100,32 @@ function SignupPage() {
                 className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
               />
             </label>
+
+            <label className="block">
+              <span className="text-sm font-medium text-slate-700">Account type</span>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as 'Buyer' | 'Admin')}
+                className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
+              >
+                <option value="Buyer">Buyer</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </label>
+
+            {role === 'Admin' && (
+              <label className="block">
+                <span className="text-sm font-medium text-slate-700">Admin code</span>
+                <input
+                  type="password"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                  placeholder="Enter the admin secret code"
+                  className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary"
+                />
+                <p className="mt-1 text-xs text-slate-500">Only one admin account can exist.</p>
+              </label>
+            )}
 
             <button
               type="submit"

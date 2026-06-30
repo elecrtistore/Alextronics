@@ -5,5 +5,6 @@ import { validateFirebaseToken } from '../middleware/validateFirebaseToken';
 const router = Router();
 
 router.get('/profile', validateFirebaseToken, authController.getProfile);
+router.post('/signup', validateFirebaseToken, authController.signup);
 
 export default router;

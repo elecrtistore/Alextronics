@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { UserProfile, UserRole } from '../types/user';
-import { fetchProfile } from '../services/authService';
+import { fetchProfile, assignRole } from '../services/authService';
 
 interface AuthContextValue {
   user: UserProfile | null;
@@ -16,10 +16,27 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
+  signupWithRole: (email: string, password: string, role: string, adminCode?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+function getStoredRole(): UserRole | null {
+  try {
+    const r = localStorage.getItem('electrishop-role');
+    if (r === 'Admin' || r === 'Buyer' || r === 'Seller') return r;
+  } catch {}
+  return null;
+}
+
+function storeRole(role: string) {
+  try { localStorage.setItem('electrishop-role', role); } catch {}
+}
+
+function clearStoredRole() {
+  try { localStorage.removeItem('electrishop-role'); } catch {}
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
@@ -33,12 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const token = await fbUser.getIdToken();
           const profile = await fetchProfile(token);
+          storeRole(profile.role);
           setUser(profile);
         } catch {
-          setUser(null);
+          const storedRole = getStoredRole();
+          setUser({
+            uid: fbUser.uid,
+            email: fbUser.email || '',
+            displayName: fbUser.displayName || fbUser.email || 'User',
+            role: storedRole || 'Buyer'
+          });
         }
       } else {
         setUser(null);
+        clearStoredRole();
       }
       setLoading(false);
     });
@@ -53,14 +78,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await createUserWithEmailAndPassword(auth, email, password);
   };
 
+  const signupWithRole = async (email: string, password: string, role: string, adminCode?: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
+    try {
+      const fbUser = auth.currentUser;
+      if (fbUser) {
+        const token = await fbUser.getIdToken();
+        const profile = await assignRole(token, role, adminCode);
+        storeRole(profile.role);
+        setUser(profile);
+      }
+    } catch {
+      storeRole(role === 'Admin' ? 'Admin' : 'Buyer');
+    }
+  };
+
   const logout = async () => {
     await signOut(auth);
     setUser(null);
     setFirebaseUser(null);
+    clearStoredRole();
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, login, signup, signupWithRole, logout }}>
       {children}
     </AuthContext.Provider>
   );

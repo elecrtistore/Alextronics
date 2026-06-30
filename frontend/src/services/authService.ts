@@ -15,3 +15,16 @@ export async function fetchProfile(idToken: string) {
   });
   return response.data;
 }
+
+export async function assignRole(idToken: string, role: string, adminCode?: string) {
+  const response = await api.post<AuthProfile>(
+    '/auth/signup',
+    { role, adminCode },
+    {
+      headers: {
+        Authorization: `Bearer ${idToken}`
+      }
+    }
+  );
+  return response.data;
+}
