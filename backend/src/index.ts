@@ -78,7 +78,8 @@ if (!Array.isArray(adminApps) || adminApps.length === 0) {
     try {
       adminModule.initializeApp();
     } catch (e) {
-      console.warn('firebase-admin default initialization failed:', e?.message || e);
+      const errMsg = e instanceof Error ? e.message : String(e);
+      console.warn('firebase-admin default initialization failed:', errMsg);
     }
   }
 }

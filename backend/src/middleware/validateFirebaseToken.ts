@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import admin from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
 
 export async function validateFirebaseToken(req: Request, res: Response, next: NextFunction) {
   const authorization = req.headers.authorization;
@@ -10,7 +10,7 @@ export async function validateFirebaseToken(req: Request, res: Response, next: N
   const token = authorization.split(' ')[1];
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    const decodedToken = await getAuth().verifyIdToken(token);
     res.locals.firebaseUser = decodedToken;
     next();
   } catch (error) {
