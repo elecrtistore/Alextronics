@@ -1,0 +1,107 @@
+import express from 'express';
+import dotenv from 'dotenv';
+import helmet from 'helmet';
+import cors from 'cors';
+import morgan from 'morgan';
+import http from 'http';
+import { Server } from 'socket.io';
+import { connectDatabase } from './config/database';
+import productRoutes from './routes/productRoutes';
+import categoryRoutes from './routes/categoryRoutes';
+import inquiryRoutes from './routes/inquiryRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import { errorHandler } from './middleware/errorHandler';
+import * as admin from 'firebase-admin';
+import fs from 'fs';
+import path from 'path';
+
+dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
+
+// Handle firebase-admin CJS/ESM interop: prefer default export if present
+const adminModule = (admin as any).default ?? admin;
+
+// Try service account file (path from env or common locations)
+const svcPathFromEnv = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+const candidatePaths: string[] = [];
+if (svcPathFromEnv) candidatePaths.push(path.resolve(svcPathFromEnv));
+// Root-level service account file
+candidatePaths.push(path.resolve(__dirname, '..', '..', 'firebase-service-account.json'));
+// Legacy root-level service account filename
+candidatePaths.push(path.resolve(__dirname, '..', '..', 'serviceAccountKey.json'));
+// backend/serviceAccountKey.json
+candidatePaths.push(path.resolve(__dirname, '..', 'serviceAccountKey.json'));
+
+let serviceAccount: any = null;
+for (const p of candidatePaths) {
+  try {
+    if (fs.existsSync(p)) {
+      const raw = fs.readFileSync(p, 'utf8');
+      serviceAccount = JSON.parse(raw);
+      console.log('Loaded Firebase service account from', p);
+      break;
+    }
+  } catch (e) {
+    // ignore parse/read errors and try next
+  }
+}
+
+const adminApps = adminModule.apps;
+if (!Array.isArray(adminApps) || adminApps.length === 0) {
+  if (serviceAccount && adminModule.credential && typeof adminModule.credential.cert === 'function') {
+    adminModule.initializeApp({ credential: adminModule.credential.cert(serviceAccount) });
+    console.log('firebase-admin initialized using service account file');
+  } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
+    // Fallback to env-based credential
+    const firebaseConfig = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    };
+    if (adminModule.credential && typeof adminModule.credential.cert === 'function') {
+      adminModule.initializeApp({ credential: adminModule.credential.cert(firebaseConfig as any) });
+      console.log('firebase-admin initialized using env FIREBASE_PRIVATE_KEY');
+    } else {
+      console.warn('firebase-admin credential not available; initializing app without explicit cert.');
+      adminModule.initializeApp();
+    }
+  } else {
+    console.warn('No Firebase service account or env credentials found; initializing firebase-admin with default credentials');
+    try {
+      adminModule.initializeApp();
+    } catch (e) {
+      console.warn('firebase-admin default initialization failed:', e?.message || e);
+    }
+  }
+}
+
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use(errorHandler);
+
+io.on('connection', (socket) => {
+  console.log('Socket connected:', socket.id);
+});
+
+const port = process.env.PORT || 5000;
+
+connectDatabase(process.env.MONGODB_URI || '')
+  .then(() => {
+    server.listen(port, () => {
+      console.log(`Server listening on http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Database connection failed', error);
+    process.exit(1);
+  });

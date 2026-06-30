@@ -1,0 +1,27 @@
+import api from './api';
+import { Inquiry, InquiryItem } from '../types/inquiry';
+
+export interface InquiryRequest {
+  customer: {
+    name: string;
+    phone: string;
+    county: string;
+    town: string;
+    estate?: string;
+    landmark?: string;
+    notes?: string;
+  };
+  items: InquiryItem[];
+  estimatedTotal: number;
+  status?: string;
+}
+
+export async function submitInquiry(inquiry: InquiryRequest) {
+  const response = await api.post<Inquiry>('/inquiries', inquiry);
+  return response.data;
+}
+
+export async function fetchInquiries() {
+  const response = await api.get<Inquiry[]>('/inquiries');
+  return response.data;
+}
