@@ -10,6 +10,7 @@ import productRoutes from './routes/productRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import inquiryRoutes from './routes/inquiryRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
+import authRoutes from './routes/authRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import * as admin from 'firebase-admin';
 import fs from 'fs';
@@ -87,6 +88,7 @@ if (!Array.isArray(adminApps) || adminApps.length === 0) {
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use(errorHandler);
 
