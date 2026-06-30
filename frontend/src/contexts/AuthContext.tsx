@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -38,15 +38,32 @@ function clearStoredRole() {
   try { localStorage.removeItem('electrishop-role'); } catch {}
 }
 
+function buildFallbackProfile(fbUser: FirebaseUser, role: UserRole): UserProfile {
+  return {
+    uid: fbUser.uid,
+    email: fbUser.email || '',
+    displayName: fbUser.displayName || fbUser.email || 'User',
+    role
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const pendingRole = useRef<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
       if (fbUser) {
+        if (pendingRole.current) {
+          const role = pendingRole.current as UserRole;
+          pendingRole.current = null;
+          setUser(buildFallbackProfile(fbUser, role));
+          setLoading(false);
+          return;
+        }
         try {
           const token = await fbUser.getIdToken();
           const profile = await fetchProfile(token);
@@ -54,12 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(profile);
         } catch {
           const storedRole = getStoredRole();
-          setUser({
-            uid: fbUser.uid,
-            email: fbUser.email || '',
-            displayName: fbUser.displayName || fbUser.email || 'User',
-            role: storedRole || 'Buyer'
-          });
+          setUser(buildFallbackProfile(fbUser, storedRole || 'Buyer'));
         }
       } else {
         setUser(null);
@@ -79,6 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signupWithRole = async (email: string, password: string, role: string, adminCode?: string) => {
+    const intendedRole = role === 'Admin' ? 'Admin' : 'Buyer';
+    pendingRole.current = intendedRole;
+
     await createUserWithEmailAndPassword(auth, email, password);
     try {
       const fbUser = auth.currentUser;
@@ -89,7 +104,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(profile);
       }
     } catch {
-      storeRole(role === 'Admin' ? 'Admin' : 'Buyer');
+      storeRole(intendedRole);
+      const fbUser = auth.currentUser;
+      if (fbUser) {
+        setUser(buildFallbackProfile(fbUser, intendedRole));
+      }
     }
   };
 
