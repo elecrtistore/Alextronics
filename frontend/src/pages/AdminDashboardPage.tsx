@@ -7,11 +7,21 @@ import { fetchInquiries } from '../services/inquiryService';
 import api from '../services/api';
 import DiscountModal from '../components/DiscountModal';
 
+interface SiteContent {
+  page: string;
+  title: string;
+  subtitle: string;
+  body: string;
+  sections: { heading: string; content: string }[];
+  meta: Record<string, string>;
+}
+
 const adminCards = [
   { id: 'products', title: 'Products', description: 'Manage shop listings and pricing', icon: '📦' },
   { id: 'orders', title: 'Inquiries', description: 'Review incoming customer requests', icon: '✉️' },
   { id: 'layout', title: 'Page layout', description: 'Rearrange product cards and page sections', icon: '🧩' },
   { id: 'discounts', title: 'Discount builder', description: 'Create a custom price layout with one click', icon: '🏷️' },
+  { id: 'site', title: 'Site Content', description: 'Edit any page (Hero, About, Contact, Footer, Settings)', icon: '📝' },
 ];
 
 interface DashboardStats {
@@ -46,11 +56,23 @@ function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editImages, setEditImages] = useState<string[]>([]);
   const [editImageInput, setEditImageInput] = useState('');
+  const [sitePages, setSitePages] = useState<Record<string, SiteContent>>({});
+  const [sitePage, setSitePage] = useState('hero');
+  const [savingSite, setSavingSite] = useState(false);
+  const [newPageName, setNewPageName] = useState('');
 
   useEffect(() => {
     fetchProducts().then(setProducts).catch(console.error);
     fetchInquiries().then(setInquiries).catch(console.error);
     api.get<DashboardStats>('/dashboard/stats').then((res) => setStats(res.data)).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    api.get<SiteContent[]>('/site').then((res) => {
+      const pages: Record<string, SiteContent> = {};
+      res.data.forEach((p) => { pages[p.page] = p; });
+      setSitePages(pages);
+    }).catch(() => {});
   }, []);
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
@@ -106,8 +128,8 @@ function AdminDashboardPage() {
         stock: stockValue,
         images,
         sellerName: user?.displayName || 'ElectriShop Owner',
-        sellerPhone: '+254700123456',
-        sellerWhatsapp: '254700123456',
+        sellerPhone: '0705980668',
+        sellerWhatsapp: '0705980668',
         featured: false,
         specifications: {},
       });
@@ -207,6 +229,124 @@ function AdminDashboardPage() {
       console.error('Failed to delete product', err);
     }
   };
+
+  function updateSiteField(field: string, value: string) {
+    setSitePages((prev) => ({
+      ...prev,
+      [sitePage]: { ...prev[sitePage], page: sitePage, title: prev[sitePage]?.title || '', subtitle: prev[sitePage]?.subtitle || '', body: prev[sitePage]?.body || '', sections: prev[sitePage]?.sections || [], meta: prev[sitePage]?.meta || {}, [field]: value }
+    }));
+  }
+
+  function updateSiteSection(index: number, field: string, value: string) {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const sections = [...(updated[sitePage]?.sections || [])];
+      sections[index] = { ...sections[index], [field]: value };
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections, meta: updated[sitePage]?.meta || {} };
+      return updated;
+    });
+  }
+
+  function removeSiteSection(index: number) {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const sections = (updated[sitePage]?.sections || []).filter((_, j) => j !== index);
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections, meta: updated[sitePage]?.meta || {} };
+      return updated;
+    });
+  }
+
+  function addSiteSection() {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const sections = [...(updated[sitePage]?.sections || []), { heading: '', content: '' }];
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections, meta: updated[sitePage]?.meta || {} };
+      return updated;
+    });
+  }
+
+  function updateSiteMetaKey(index: number, value: string) {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const entries = Object.entries(updated[sitePage]?.meta || {});
+      const oldKey = entries[index][0];
+      const newMeta: Record<string, string> = {};
+      entries.forEach(([k, v], i) => { newMeta[i === index ? value : k] = v; });
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections: updated[sitePage]?.sections || [], meta: newMeta };
+      return updated;
+    });
+  }
+
+  function updateSiteMetaValue(index: number, value: string) {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const entries = Object.entries(updated[sitePage]?.meta || {});
+      const newMeta: Record<string, string> = {};
+      entries.forEach(([k, v], i) => { newMeta[k] = i === index ? value : v; });
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections: updated[sitePage]?.sections || [], meta: newMeta };
+      return updated;
+    });
+  }
+
+  function removeSiteMeta(index: number) {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const entries = Object.entries(updated[sitePage]?.meta || {});
+      const newMeta: Record<string, string> = {};
+      entries.forEach(([k, v], i) => { if (i !== index) newMeta[k] = v; });
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections: updated[sitePage]?.sections || [], meta: newMeta };
+      return updated;
+    });
+  }
+
+  function addSiteMeta() {
+    setSitePages((prev) => {
+      const updated = { ...prev };
+      const meta = { ...(updated[sitePage]?.meta || {}), '': '' };
+      updated[sitePage] = { ...updated[sitePage], page: sitePage, title: updated[sitePage]?.title || '', subtitle: updated[sitePage]?.subtitle || '', body: updated[sitePage]?.body || '', sections: updated[sitePage]?.sections || [], meta };
+      return updated;
+    });
+  }
+
+  async function handleSaveSite() {
+    setSavingSite(true);
+    try {
+      const res = await api.put(`/site/${sitePage}`, sitePages[sitePage]);
+      setSitePages((prev) => ({ ...prev, [sitePage]: res.data }));
+    } catch (err) {
+      console.error('Failed to save', err);
+    } finally {
+      setSavingSite(false);
+    }
+  }
+
+  async function handleDeletePage() {
+    if (!window.confirm(`Delete the "${sitePage}" page?`)) return;
+    try {
+      await api.delete(`/site/${sitePage}`);
+      setSitePages((prev) => {
+        const updated = { ...prev };
+        delete updated[sitePage];
+        return updated;
+      });
+      const remaining = Object.keys(sitePages).filter((k) => k !== sitePage);
+      if (remaining.length > 0) setSitePage(remaining[0]);
+    } catch (err) {
+      console.error('Failed to delete page', err);
+    }
+  }
+
+  async function handleCreatePage() {
+    if (!newPageName) return;
+    try {
+      const res = await api.put(`/site/${newPageName}`, { title: '', subtitle: '', body: '', sections: [], meta: {} });
+      setSitePages((prev) => ({ ...prev, [newPageName]: res.data }));
+      setSitePage(newPageName);
+      setNewPageName('');
+    } catch (err) {
+      console.error('Failed to create page', err);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -574,6 +714,163 @@ function AdminDashboardPage() {
                   <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
                     <p className="text-sm text-slate-500">Example</p>
                     <p className="mt-2 text-sm text-slate-700">A 20% discount on KSh 5,400 becomes KSh 4,320.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeCard === 'site' && (
+              <div className="rounded-[1.75rem] bg-white p-6 shadow-soft ring-1 ring-slate-200/70">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-charcoal">Site Content</h2>
+                    <p className="mt-2 text-sm text-slate-600">Create and edit pages. Changes appear live on the site.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={sitePage}
+                      onChange={(e) => setSitePage(e.target.value)}
+                      className="rounded-3xl border border-slate-200 bg-white px-4 py-2 text-sm text-charcoal focus:border-primary outline-none"
+                    >
+                      {Object.keys(sitePages).length === 0 && <option value="">-- No pages --</option>}
+                      {Object.keys(sitePages).sort().map((key) => (
+                        <option key={key} value={key}>{key}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-5">
+                  <label className="block">
+                    <span className="text-sm font-medium text-slate-700">Title</span>
+                    <input
+                      value={sitePages[sitePage]?.title || ''}
+                      onChange={(e) => updateSiteField('title', e.target.value)}
+                      className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-medium text-slate-700">Subtitle</span>
+                    <input
+                      value={sitePages[sitePage]?.subtitle || ''}
+                      onChange={(e) => updateSiteField('subtitle', e.target.value)}
+                      className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-medium text-slate-700">Body</span>
+                    <textarea
+                      value={sitePages[sitePage]?.body || ''}
+                      onChange={(e) => updateSiteField('body', e.target.value)}
+                      rows={4}
+                      className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                    />
+                  </label>
+                  <div>
+                    <span className="text-sm font-medium text-slate-700">Sections</span>
+                    {(sitePages[sitePage]?.sections || []).map((section, i) => (
+                      <div key={i} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                        <input
+                          value={section.heading}
+                          onChange={(e) => updateSiteSection(i, 'heading', e.target.value)}
+                          placeholder="Heading"
+                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                        />
+                        <input
+                          value={section.content}
+                          onChange={(e) => updateSiteSection(i, 'content', e.target.value)}
+                          placeholder="Content"
+                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeSiteSection(i)}
+                          className="rounded-full border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addSiteSection}
+                      className="mt-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Add section
+                    </button>
+                  </div>
+
+                  <div>
+                    <span className="text-sm font-medium text-slate-700">Meta (key-value settings)</span>
+                    {Object.entries(sitePages[sitePage]?.meta || {}).map(([key, value], i) => (
+                      <div key={i} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                        <input
+                          value={key}
+                          onChange={(e) => updateSiteMetaKey(i, e.target.value)}
+                          placeholder="Key"
+                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                        />
+                        <input
+                          value={value}
+                          onChange={(e) => updateSiteMetaValue(i, e.target.value)}
+                          placeholder="Value"
+                          className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeSiteMeta(i)}
+                          className="rounded-full border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addSiteMeta}
+                      className="mt-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Add meta
+                    </button>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      disabled={savingSite}
+                      onClick={handleSaveSite}
+                      className="flex-1 rounded-[1.25rem] bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
+                    >
+                      {savingSite ? 'Saving…' : 'Save changes'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeletePage}
+                      className="rounded-[1.25rem] border border-rose-200 bg-white px-6 py-4 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                    >
+                      Delete page
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-8 border-t border-slate-200 pt-6">
+                  <h3 className="text-lg font-semibold text-charcoal">Create new page</h3>
+                  <p className="mt-2 text-sm text-slate-600">Add a new editable page section (e.g. "faq", "services", "hero").</p>
+                  <div className="mt-4 flex gap-3">
+                    <input
+                      value={newPageName}
+                      onChange={(e) => setNewPageName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      placeholder="page-name"
+                      className="flex-1 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal focus:border-primary outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={!newPageName}
+                      onClick={handleCreatePage}
+                      className="rounded-3xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+                    >
+                      Create
+                    </button>
                   </div>
                 </div>
               </div>

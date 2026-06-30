@@ -1,20 +1,52 @@
 import { Link, NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
+
+interface SiteContent {
+  page: string;
+  title: string;
+  subtitle: string;
+  body: string;
+  sections: { heading: string; content: string }[];
+  meta: Record<string, string>;
+}
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [shopName, setShopName] = useState('ElectriShop');
+  const [footerContent, setFooterContent] = useState({ left: '© 2026 ElectriShop.', right: 'Browse inventory, request details, and contact us directly.' });
+
+  useEffect(() => {
+    api.get<SiteContent>('/site/settings')
+      .then((res) => {
+        if (res.data.title) setShopName(res.data.title);
+      })
+      .catch(() => {});
+    api.get<SiteContent>('/site/footer')
+      .then((res) => {
+        if (res.data.title) {
+          setFooterContent({
+            left: res.data.title,
+            right: res.data.subtitle || 'Browse inventory, request details, and contact us directly.'
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div>
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link to="/" className="text-xl font-semibold tracking-tight text-charcoal">ElectriShop</Link>
+          <Link to="/" className="text-xl font-semibold tracking-tight text-charcoal">{shopName}</Link>
 
           <nav className="hidden items-center gap-6 md:flex">
             <NavLink to="/shop" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Store</NavLink>
-            <NavLink to="/inquiry-list" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Inquiry Cart</NavLink>
+            {user?.role !== 'Admin' && (
+              <NavLink to="/inquiry-list" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>Inquiry Cart</NavLink>
+            )}
             {user && (
               <NavLink to="/my-inquiries" className={({ isActive }) => isActive ? 'font-semibold text-primary' : 'text-sm text-slate-600'}>My Inquiries</NavLink>
             )}
@@ -51,7 +83,9 @@ function Layout({ children }: { children: React.ReactNode }) {
           <div className="border-t border-slate-200 bg-white md:hidden">
             <div className="space-y-2 px-4 py-4">
               <NavLink to="/shop" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Store</NavLink>
-              <NavLink to="/inquiry-list" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Inquiry Cart</NavLink>
+              {user?.role !== 'Admin' && (
+                <NavLink to="/inquiry-list" onClick={() => setOpen(false)} className="block text-sm text-slate-700">Inquiry Cart</NavLink>
+              )}
               {user && (
                 <NavLink to="/my-inquiries" onClick={() => setOpen(false)} className="block text-sm text-slate-700">My Inquiries</NavLink>
               )}
@@ -68,8 +102,8 @@ function Layout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-slate-200 bg-white py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-col gap-4 text-sm text-slate-600 md:flex-row md:items-center md:justify-between">
-            <p>© 2026 ElectriShop. A private electronics shop for direct buyer inquiries.</p>
-            <p>Browse inventory, request details, and contact us directly.</p>
+            <p>{footerContent.left}</p>
+            <p>{footerContent.right}</p>
           </div>
         </div>
       </footer>

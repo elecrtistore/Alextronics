@@ -4,7 +4,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
 import { Product } from '../types/product';
 import { fetchProducts, updateProduct } from '../services/productService';
+import api from '../services/api';
 import DiscountModal from '../components/DiscountModal';
+
+interface HeroContent {
+  title: string;
+  subtitle: string;
+  body: string;
+  sections: { heading: string; content: string }[];
+}
 
 function ShopPage() {
   const { user } = useAuth();
@@ -18,9 +26,18 @@ function ShopPage() {
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [discountTargetId, setDiscountTargetId] = useState<string | null>(null);
+  const [hero, setHero] = useState<HeroContent>({
+    title: 'Shop electronics',
+    subtitle: 'Browse the private shop\'s inventory and add products to your inquiry list.',
+    body: '',
+    sections: []
+  });
 
   useEffect(() => {
     fetchProducts().then(setProducts).catch(console.error);
+    api.get('/site/hero').then((res) => {
+      if (res.data.title) setHero(res.data);
+    }).catch(() => {});
   }, []);
 
   const categories = useMemo(
@@ -107,8 +124,9 @@ function ShopPage() {
       <div className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-white via-orange-50 to-slate-100 p-6 shadow-soft ring-1 ring-slate-200/70">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-charcoal">Shop electronics</h1>
-            <p className="mt-2 text-sm text-slate-600">Browse the private shop's inventory and add products to your inquiry list.</p>
+            <h1 className="text-3xl font-semibold text-charcoal">{hero.title}</h1>
+            <p className="mt-2 text-sm text-slate-600">{hero.subtitle}</p>
+            {hero.body && <p className="mt-3 text-sm text-slate-600">{hero.body}</p>}
             {isAdmin && (
               <p className="mt-2 rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">Admin mode: drag cards to reorder products, edit prices, and apply discounts.</p>
             )}

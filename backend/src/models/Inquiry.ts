@@ -4,8 +4,8 @@ const inquirySchema = new Schema({
   customer: {
     name: { type: String, required: true },
     phone: { type: String, required: true },
-    county: { type: String, required: true },
-    town: { type: String, required: true },
+    county: { type: String, default: '' },
+    town: { type: String, default: '' },
     estate: { type: String, default: '' },
     landmark: { type: String, default: '' },
     notes: { type: String, default: '' }

@@ -5,11 +5,6 @@ export interface InquiryRequest {
   customer: {
     name: string;
     phone: string;
-    county: string;
-    town: string;
-    estate?: string;
-    landmark?: string;
-    notes?: string;
   };
   items: InquiryItem[];
   estimatedTotal: number;

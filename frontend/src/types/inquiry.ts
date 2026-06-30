@@ -10,10 +10,10 @@ export interface InquiryItem {
 export interface InquiryCustomer {
   name: string;
   phone: string;
-  county: string;
-  town: string;
-  estate: string;
-  landmark: string;
+  county?: string;
+  town?: string;
+  estate?: string;
+  landmark?: string;
   notes?: string;
 }
 

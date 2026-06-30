@@ -6,15 +6,7 @@ import { submitInquiry } from '../services/inquiryService';
 function InquiryFormPage() {
   const navigate = useNavigate();
   const { items, totalAmount, clear } = useInquiry();
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    county: '',
-    town: '',
-    estate: '',
-    landmark: '',
-    notes: ''
-  });
+  const [form, setForm] = useState({ name: '', phone: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,15 +24,7 @@ function InquiryFormPage() {
     setError('');
     try {
       await submitInquiry({
-        customer: {
-          name: form.name,
-          phone: form.phone,
-          county: form.county,
-          town: form.town,
-          estate: form.estate || undefined,
-          landmark: form.landmark || undefined,
-          notes: form.notes || undefined
-        },
+        customer: { name: form.name, phone: form.phone },
         items: items.map((item) => ({
           productId: item.productId,
           name: item.name,
@@ -74,7 +58,7 @@ function InquiryFormPage() {
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="rounded-[1.5rem] bg-white p-8 shadow-soft">
         <h1 className="text-3xl font-semibold text-charcoal">Submit inquiry</h1>
-        <p className="mt-2 text-sm text-slate-600">Provide your contact details so sellers can reach you directly.</p>
+        <p className="mt-2 text-sm text-slate-600">The seller will contact you directly using the details below.</p>
 
         <form onSubmit={handleSubmit} className="mt-8 grid gap-6">
           {error && (
@@ -92,44 +76,22 @@ function InquiryFormPage() {
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">County</span>
-              <input value={form.county} onChange={(event) => updateField('county', event.target.value)} required className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary" />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Town</span>
-              <input value={form.town} onChange={(event) => updateField('town', event.target.value)} required className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary" />
-            </label>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Estate</span>
-              <input value={form.estate} onChange={(event) => updateField('estate', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary" />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Landmark</span>
-              <input value={form.landmark} onChange={(event) => updateField('landmark', event.target.value)} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary" />
-            </label>
-          </div>
-
-          <label className="block">
-            <span className="text-sm font-medium text-slate-700">Additional notes</span>
-            <textarea value={form.notes} onChange={(event) => updateField('notes', event.target.value)} rows={4} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary" />
-          </label>
-
           <div className="rounded-[1.5rem] bg-slate-50 p-5">
-            <h2 className="text-lg font-semibold text-charcoal">Inquiry summary</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div>
-                <p className="text-sm text-slate-500">Products</p>
-                <p className="mt-2 text-lg font-semibold text-charcoal">{items.length} item{items.length > 1 ? 's' : ''}</p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-500">Estimated total</p>
-                <p className="mt-2 text-lg font-semibold text-charcoal">KSh {totalAmount.toLocaleString()}</p>
-              </div>
+            <h2 className="text-lg font-semibold text-charcoal">Products</h2>
+            <div className="mt-4 space-y-3">
+              {items.map((item) => (
+                <div key={item.productId} className="flex items-center justify-between border-b border-slate-200 pb-3 last:border-0">
+                  <div>
+                    <p className="font-medium text-charcoal">{item.name}</p>
+                    <p className="text-sm text-slate-500">Qty: {item.quantity} x KSh {item.price.toLocaleString()}</p>
+                  </div>
+                  <p className="font-semibold text-charcoal">KSh {(item.price * item.quantity).toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
+              <p className="text-sm text-slate-500">Total</p>
+              <p className="text-lg font-semibold text-charcoal">KSh {totalAmount.toLocaleString()}</p>
             </div>
           </div>
 
