@@ -14,7 +14,7 @@ import authRoutes from './routes/authRoutes';
 import siteRoutes from './routes/siteRoutes';
 import emailRoutes from './routes/emailRoutes';
 import { errorHandler } from './middleware/errorHandler';
-import { initializeApp, getApps, credential } from 'firebase-admin';
+import { initializeApp, getApps, credential as firebaseCredential } from 'firebase-admin';
 import fs from 'fs';
 import path from 'path';
 
@@ -66,8 +66,8 @@ for (const p of candidatePaths) {
 }
 
 if (getApps().length === 0) {
-  if (serviceAccount && typeof credential.cert === 'function') {
-    initializeApp({ credential: credential.cert(serviceAccount) });
+  if (serviceAccount && typeof firebaseCredential.cert === 'function') {
+    initializeApp({ credential: firebaseCredential.cert(serviceAccount) });
     console.log('firebase-admin initialized using service account file');
   } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
     const firebaseConfig = {
@@ -75,11 +75,11 @@ if (getApps().length === 0) {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
     };
-    if (typeof credential.cert === 'function') {
-      initializeApp({ credential: credential.cert(firebaseConfig as any) });
+    if (typeof firebaseCredential.cert === 'function') {
+      initializeApp({ credential: firebaseCredential.cert(firebaseConfig as any) });
       console.log('firebase-admin initialized using env FIREBASE_PRIVATE_KEY');
     } else {
-      console.warn('credential.cert not available; initializing without explicit cert.');
+      console.warn('firebaseCredential.cert not available; initializing without explicit cert.');
       initializeApp();
     }
   } else {
