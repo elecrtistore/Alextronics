@@ -75,7 +75,7 @@ function ProductDetailsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className={`inline-block w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-emerald-500' : 'bg-red-400'}`} />
-                <span className="text-sm text-soft">{product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</span>
+                <span className="text-sm text-soft">{product.stock > 0 ? 'In stock' : 'Out of stock'}</span>
               </div>
             </div>
 
