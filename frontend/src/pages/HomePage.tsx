@@ -21,6 +21,7 @@ function HomePage() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [subscribeError, setSubscribeError] = useState('');
 
   useEffect(() => {
     fetchProducts().then(setProducts).catch(() => {});
@@ -38,11 +39,14 @@ function HomePage() {
   const handleSubscribe = async () => {
     if (!email || subscribing) return;
     setSubscribing(true);
+    setSubscribeError('');
     try {
-      const res = await api.post('/email/subscribe', { email });
+      await api.post('/email/subscribe', { email });
       setSubscribed(true);
       setEmail('');
-    } catch { /* ignore */ } finally {
+    } catch (err: any) {
+      setSubscribeError(err.response?.data?.message || 'Subscription failed. Try again.');
+    } finally {
       setSubscribing(false);
     }
   };
@@ -229,11 +233,14 @@ function HomePage() {
           {subscribed ? (
             <p className="text-sm font-semibold text-emerald-600">You're subscribed! Check your inbox for updates.</p>
           ) : (
-            <div className="flex gap-3 max-w-md mx-auto">
-              <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Enter your email" className="flex-1 rounded-full border border-border bg-white px-5 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
-              <button onClick={handleSubscribe} disabled={subscribing} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition whitespace-nowrap disabled:opacity-50">
-                {subscribing ? '...' : 'Subscribe'}
-              </button>
+            <div className="space-y-3">
+              {subscribeError && <p className="text-sm text-red-500">{subscribeError}</p>}
+              <div className="flex gap-3 max-w-md mx-auto">
+                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Enter your email" className="flex-1 rounded-full border border-border bg-white px-5 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
+                <button onClick={handleSubscribe} disabled={subscribing} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition whitespace-nowrap disabled:opacity-50">
+                  {subscribing ? '...' : 'Subscribe'}
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -63,6 +63,8 @@ function AdminDashboardPage() {
   const [savingSite, setSavingSite] = useState(false);
   const [newPageName, setNewPageName] = useState('');
   const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+  const [subscribersError, setSubscribersError] = useState('');
   const [emailTemplate, setEmailTemplate] = useState('custom');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
@@ -70,12 +72,28 @@ function AdminDashboardPage() {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailResult, setEmailResult] = useState<string | null>(null);
 
+  const fetchSubscribers = async () => {
+    setSubscribersLoading(true);
+    setSubscribersError('');
+    try {
+      const res = await api.get('/email/subscribers');
+      setSubscribers(res.data);
+    } catch (err: any) {
+      setSubscribersError(err.response?.data?.message || 'Failed to load subscribers');
+    } finally {
+      setSubscribersLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts().then(setProducts).catch(console.error);
     fetchInquiries().then(setInquiries).catch(console.error);
     api.get<DashboardStats>('/dashboard/stats').then((res) => setStats(res.data)).catch(console.error);
-    api.get('/email/subscribers').then((res) => setSubscribers(res.data)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (activeCard === 'email') fetchSubscribers();
+  }, [activeCard]);
 
   useEffect(() => {
     api.get<SiteContent[]>('/site').then((res) => {
@@ -735,8 +753,16 @@ function AdminDashboardPage() {
                       <h2 className="text-xl font-semibold text-charcoal">Subscribers</h2>
                       <p className="mt-2 text-sm text-slate-600">{subscribers.length} active subscribers</p>
                     </div>
+                    <button onClick={fetchSubscribers} disabled={subscribersLoading} className="rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-slate-50 transition disabled:opacity-50">
+                      {subscribersLoading ? '...' : 'Refresh'}
+                    </button>
                   </div>
-                  {subscribers.length === 0 ? (
+                  {subscribersError && (
+                    <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">{subscribersError}</div>
+                  )}
+                  {subscribersLoading ? (
+                    <div className="mt-6 text-sm text-slate-500 animate-pulse">Loading subscribers...</div>
+                  ) : subscribers.length === 0 ? (
                     <p className="mt-6 text-sm text-slate-500">No subscribers yet.</p>
                   ) : (
                     <div className="mt-6 space-y-2">
