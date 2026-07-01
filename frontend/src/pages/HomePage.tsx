@@ -87,10 +87,10 @@ function HomePage() {
             </div>
             <div className="relative hidden lg:block">
               <div className="relative grid grid-cols-3 gap-4">
-                {['📺', '💻', '📱', '🎧', '📷', '⌚'].map((emoji, i) => (
-                  <div key={i} className={`aspect-square rounded-2xl bg-white/80 backdrop-blur-sm shadow-soft flex items-center justify-center text-4xl hover:scale-105 transition-transform ${i === 1 ? 'translate-y-4' : i === 2 ? '-translate-y-2' : ''}`}>
-                    {emoji}
-                  </div>
+                {(products.length > 0 ? products.slice(0, 6) : []).map((product, i) => (
+                  <Link key={product._id} to={`/products/${product._id}`} className={`aspect-square rounded-2xl bg-white/80 backdrop-blur-sm shadow-soft overflow-hidden hover:scale-105 transition-transform ${i === 1 ? 'translate-y-4' : i === 2 ? '-translate-y-2' : ''}`}>
+                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2" />
+                  </Link>
                 ))}
               </div>
             </div>
