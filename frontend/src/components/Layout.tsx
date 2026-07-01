@@ -17,7 +17,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [shopName, setShopName] = useState('ElectriShop');
+  const [shopName, setShopName] = useState('ALEXTRONICS');
   const [logoError, setLogoError] = useState(false);
   const [footerSections, setFooterSections] = useState<{ heading: string; content: string }[]>([]);
   const [footerMeta, setFooterMeta] = useState<Record<string, string>>({});

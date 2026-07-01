@@ -31,7 +31,7 @@ function buildTemplate(template: string, data: any): string {
       <div style="background:#fff;border-radius:24px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
         ${body}
       </div>
-      <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:24px">ElectriShop &mdash; Premium Electronics Marketplace</p>
+      <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:24px">ALEXTRONICS &mdash; Premium Electronics Marketplace</p>
       <p style="text-align:center;font-size:12px;color:#9ca3af">Unsubscribe anytime by replying to this email.</p>
     </div>
   `;
@@ -53,7 +53,7 @@ function buildTemplate(template: string, data: any): string {
       ${(data.products || []).map(productCard).join('')}
     `),
     'custom': wrap(`
-      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">${data.subject || 'News from ElectriShop'}</h1>
+      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">${data.subject || 'News from ALEXTRONICS'}</h1>
       <div style="font-size:14px;color:#6b7280;line-height:1.7">${data.body || ''}</div>
       ${(data.products || []).map(productCard).join('')}
     `),
@@ -123,13 +123,13 @@ export async function sendEmail(req: any, res: any) {
 
     const from = process.env.EMAIL_FROM || 'noreply@electristore.com';
     const html = buildTemplate(template || 'custom', { subject, body, products });
-    const text = `Email from ElectriShop\n\n${body || ''}`;
+    const text = `Email from ALEXTRONICS\n\n${body || ''}`;
 
     let sent = 0;
     const errors: string[] = [];
     for (const sub of subscribers) {
       try {
-        await transporter.sendMail({ from, to: sub.email, subject: subject || 'News from ElectriShop', text, html });
+        await transporter.sendMail({ from, to: sub.email, subject: subject || 'News from ALEXTRONICS', text, html });
         sent++;
       } catch (e: any) {
         errors.push(`${sub.email}: ${e.message}`);

@@ -54,12 +54,12 @@ function HomePage() {
   return (
     <div>
       {/* ─── HERO ─── */}
-      <section className="relative min-h-[70vh] lg:min-h-[90vh] flex items-center bg-gradient-to-br from-orange-50 via-white to-amber-50 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,#F97316_0%,transparent_50%)] opacity-10" />
+      <section className="relative min-h-[70vh] lg:min-h-[90vh] flex items-center bg-[#F5F5F0] overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 25% 25%, #1E3A5F 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-16 w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <div className="inline-flex items-center gap-2 border border-primary/20 bg-primary-light px-4 py-1.5 text-sm font-medium text-primary tracking-wide">
                 <Package size={14} /> Private electronics marketplace
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-charcoal leading-[1.05]">
@@ -69,10 +69,10 @@ function HomePage() {
                 {hero.subtitle || 'Browse curated electronics and request a quote directly from the seller. No middlemen, just great deals.'}
               </p>
               <div className="flex gap-3">
-                <Link to="/shop" className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20">
+                <Link to="/shop" className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition border border-primary">
                   Start shopping <ArrowRight size={16} />
                 </Link>
-                <Link to="/about" className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition">
+                <Link to="/about" className="inline-flex items-center gap-2 border border-border bg-white px-6 py-3 text-sm font-semibold text-charcoal hover:bg-[#F5F5F0] transition">
                   Learn more
                 </Link>
               </div>
@@ -92,7 +92,7 @@ function HomePage() {
             <div className="relative hidden lg:block">
               <div className="relative grid grid-cols-3 gap-4">
                 {(products.length > 0 ? products.slice(0, 6) : []).map((product, i) => (
-                  <Link key={product._id} to={`/products/${product._id}`} className={`aspect-square rounded-2xl bg-white/80 backdrop-blur-sm shadow-soft overflow-hidden hover:scale-105 transition-transform ${i === 1 ? 'translate-y-4' : i === 2 ? '-translate-y-2' : ''}`}>
+                  <Link key={product._id} to={`/products/${product._id}`} className={`aspect-square border border-border bg-white overflow-hidden hover:scale-105 transition-transform ${i === 1 ? 'translate-y-4' : i === 2 ? '-translate-y-2' : ''}`}>
                     <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2" />
                   </Link>
                 ))}
@@ -204,7 +204,7 @@ function HomePage() {
       {/* ─── WHY CHOOSE US ─── */}
       <section className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-6">
-          <h2 className="text-2xl font-bold text-charcoal text-center mb-4">Why Choose ElectriShop</h2>
+          <h2 className="text-2xl font-bold text-charcoal text-center mb-4">Why Choose ALEXTRONICS</h2>
           <p className="text-sm text-soft text-center mb-12 max-w-lg mx-auto">We make buying electronics simple, transparent, and personal.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
             {[

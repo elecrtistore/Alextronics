@@ -35,7 +35,7 @@ function LoginPage() {
             <LogIn size={24} className="text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-charcoal">Sign in</h1>
-          <p className="mt-2 text-sm text-soft">Welcome back to ElectriShop.</p>
+          <p className="mt-2 text-sm text-soft">Welcome back to ALEXTRONICS.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

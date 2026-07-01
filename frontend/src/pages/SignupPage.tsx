@@ -30,7 +30,7 @@ function SignupPage() {
             <UserPlus size={24} className="text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-charcoal">Create account</h1>
-          <p className="mt-2 text-sm text-soft">Join ElectriShop to start inquiring.</p>
+          <p className="mt-2 text-sm text-soft">Join ALEXTRONICS to start inquiring.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

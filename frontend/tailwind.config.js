@@ -3,13 +3,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: { DEFAULT: '#F97316', hover: '#EA580C', light: '#FFF7ED' },
+        primary: { DEFAULT: '#1E3A5F', hover: '#15294A', light: '#E8EDF5' },
         charcoal: '#111827',
         surface: '#FFFFFF',
-        background: '#F8FAFC',
+        background: '#F5F5F0',
         soft: '#6B7280',
-        border: '#E5E7EB',
-        accent: '#10B981'
+        border: '#D4D4D4',
+        accent: '#0D9488'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif']

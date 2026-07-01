@@ -155,7 +155,7 @@ function AdminDashboardPage() {
         price: priceValue,
         stock: stockValue,
         images,
-        sellerName: user?.displayName || 'ElectriShop Owner',
+        sellerName: user?.displayName || 'ALEXTRONICS',
         sellerPhone: '0708309429',
         sellerWhatsapp: '0708309429',
         featured: false,

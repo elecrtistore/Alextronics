@@ -10,9 +10,9 @@ interface SiteContent {
 
 const defaults: SiteContent = {
   page: 'about',
-  title: 'About ElectriShop',
+  title: 'About ALEXTRONICS',
   subtitle: 'Your trusted source for quality electronics.',
-  body: 'ElectriShop is an inquiry-first private shop built for direct customer contact. We focus on product browsing, simple inquiry tracking, and a direct connection between you and the seller.',
+  body: 'ALEXTRONICS is an inquiry-first private shop built for direct customer contact. We focus on product browsing, simple inquiry tracking, and a direct connection between you and the seller.',
   sections: [
     { heading: 'Explore', content: 'Browse curated electronics and request product details directly from the shop owner.' },
     { heading: 'Inquire', content: 'Send the shop owner a single request for pricing, stock, and delivery details.' },

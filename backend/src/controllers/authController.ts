@@ -51,11 +51,6 @@ export async function signup(req: Request, res: Response) {
       return res.status(403).json({ message: 'Invalid admin code.' });
     }
 
-    const existingAdmin = await Admin.findOne({});
-    if (existingAdmin) {
-      return res.status(403).json({ message: 'An admin account already exists. Only one admin is allowed.' });
-    }
-
     await Admin.create({ firebaseUID: firebaseUser.uid, email: firebaseUser.email, role: 'admin' });
   }
 
