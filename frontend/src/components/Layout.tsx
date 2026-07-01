@@ -58,7 +58,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     } catch { /* ignore */ }
   };
 
-  const isHome = location.pathname === '/' || location.pathname === '/shop';
+  const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
 
   const navLinks = [
