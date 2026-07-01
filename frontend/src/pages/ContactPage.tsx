@@ -15,7 +15,7 @@ const defaults: SiteContent = {
   sections: [
     { heading: 'Phone', content: '0708309429' },
     { heading: 'WhatsApp', content: '0708309429' },
-    { heading: 'Email', content: 'electristore@gmail.com' }
+    { heading: 'Email', content: 'alextronics.shop01@gmail.com' }
   ]
 };
 

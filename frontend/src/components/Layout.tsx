@@ -80,7 +80,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             {logoError ? (
               <span className="text-lg font-bold text-primary">{shopName}</span>
             ) : (
-              <img src="/shop/logo.png" alt={shopName} className="h-8 w-auto" onError={() => setLogoError(true)} />
+              <img src="/logo.png" alt={shopName} className="h-8 w-auto" onError={() => setLogoError(true)} />
             )}
           </Link>
 

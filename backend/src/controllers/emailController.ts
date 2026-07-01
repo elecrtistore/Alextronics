@@ -22,7 +22,7 @@ function buildTemplate(template: string, data: any): string {
       <h3 style="margin:0 0 4px;font-size:16px;font-weight:600;color:#111827">${p.name}</h3>
       <p style="margin:0 0 8px;font-size:13px;color:#6b7280">${p.brand || ''}</p>
       ${p.discount ? `<p style="margin:0 0 4px;font-size:18px;font-weight:700;color:#111827">KSh ${Math.round(p.price * (1 - p.discount / 100)).toLocaleString()}</p><p style="margin:0;font-size:13px;color:#6b7280"><del>KSh ${p.price.toLocaleString()}</del> <span style="color:#059669;font-weight:600">${p.discount}% OFF</span></p>` : `<p style="margin:0;font-size:18px;font-weight:700;color:#111827">KSh ${p.price.toLocaleString()}</p>`}
-      <a href="${process.env.FRONTEND_URL || 'http://127.0.0.1:4173/shop'}/products/${p._id}" style="display:inline-block;margin-top:12px;padding:10px 24px;background:#f97316;color:#fff;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600">View product</a>
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/products/${p._id}" style="display:inline-block;margin-top:12px;padding:10px 24px;background:#1E3A5F;color:#fff;border-radius:4px;text-decoration:none;font-size:13px;font-weight:600">View product</a>
     </div>
   `;
 
@@ -38,17 +38,17 @@ function buildTemplate(template: string, data: any): string {
 
   const templates: Record<string, string> = {
     'new-arrival': wrap(`
-      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">New Arrivals Just Landed 🚀</h1>
+      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">New Arrivals Just Landed</h1>
       <p style="font-size:14px;color:#6b7280;margin:0 0 24px">Check out the latest products added to our catalog.</p>
       ${(data.products || []).map(productCard).join('')}
     `),
     'discount': wrap(`
-      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">Price Drop Alert! 🔥</h1>
+      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">Price Drop Alert!</h1>
       <p style="font-size:14px;color:#6b7280;margin:0 0 24px">Great news! Some of your favorite items now have discounts.</p>
       ${(data.products || []).map(productCard).join('')}
     `),
     'product-spotlight': wrap(`
-      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">Product Spotlight ✨</h1>
+      <h1 style="font-size:24px;font-weight:700;color:#111827;margin:0 0 8px">Product Spotlight</h1>
       <p style="font-size:14px;color:#6b7280;margin:0 0 24px">We're featuring a curated selection just for you.</p>
       ${(data.products || []).map(productCard).join('')}
     `),
