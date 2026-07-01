@@ -14,7 +14,7 @@ import authRoutes from './routes/authRoutes';
 import siteRoutes from './routes/siteRoutes';
 import emailRoutes from './routes/emailRoutes';
 import { errorHandler } from './middleware/errorHandler';
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, credential } from 'firebase-admin';
 import fs from 'fs';
 import path from 'path';
 
@@ -43,18 +43,12 @@ app.use(morgan('dev'));
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
-// Handle firebase-admin CJS/ESM interop: prefer default export if present
-const adminModule = (admin as any).default ?? admin;
-
 // Try service account file (path from env or common locations)
 const svcPathFromEnv = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 const candidatePaths: string[] = [];
 if (svcPathFromEnv) candidatePaths.push(path.resolve(svcPathFromEnv));
-// Root-level service account file
 candidatePaths.push(path.resolve(__dirname, '..', '..', 'firebase-service-account.json'));
-// Legacy root-level service account filename
 candidatePaths.push(path.resolve(__dirname, '..', '..', 'serviceAccountKey.json'));
-// backend/serviceAccountKey.json
 candidatePaths.push(path.resolve(__dirname, '..', 'serviceAccountKey.json'));
 
 let serviceAccount: any = null;
@@ -71,29 +65,27 @@ for (const p of candidatePaths) {
   }
 }
 
-const adminApps = adminModule.apps;
-if (!Array.isArray(adminApps) || adminApps.length === 0) {
-  if (serviceAccount && adminModule.credential && typeof adminModule.credential.cert === 'function') {
-    adminModule.initializeApp({ credential: adminModule.credential.cert(serviceAccount) });
+if (getApps().length === 0) {
+  if (serviceAccount && typeof credential.cert === 'function') {
+    initializeApp({ credential: credential.cert(serviceAccount) });
     console.log('firebase-admin initialized using service account file');
   } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
-    // Fallback to env-based credential
     const firebaseConfig = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
     };
-    if (adminModule.credential && typeof adminModule.credential.cert === 'function') {
-      adminModule.initializeApp({ credential: adminModule.credential.cert(firebaseConfig as any) });
+    if (typeof credential.cert === 'function') {
+      initializeApp({ credential: credential.cert(firebaseConfig as any) });
       console.log('firebase-admin initialized using env FIREBASE_PRIVATE_KEY');
     } else {
-      console.warn('firebase-admin credential not available; initializing app without explicit cert.');
-      adminModule.initializeApp();
+      console.warn('credential.cert not available; initializing without explicit cert.');
+      initializeApp();
     }
   } else {
-    console.warn('No Firebase service account or env credentials found; initializing firebase-admin with default credentials');
+    console.warn('No Firebase credentials found; initializing with default credentials');
     try {
-      adminModule.initializeApp();
+      initializeApp();
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : String(e);
       console.warn('firebase-admin default initialization failed:', errMsg);
