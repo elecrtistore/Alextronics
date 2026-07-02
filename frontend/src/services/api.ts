@@ -14,10 +14,15 @@ api.interceptors.request.use(async (config) => {
   const user = auth.currentUser;
   if (user) {
     const token = await user.getIdToken();
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer ${token}`
-    };
+    if (config.headers) {
+      if (typeof (config.headers as any).set === 'function') {
+        (config.headers as any).set('Authorization', `Bearer ${token}`);
+      } else {
+        (config.headers as any).Authorization = `Bearer ${token}`;
+      }
+    } else {
+      config.headers = { Authorization: `Bearer ${token}` } as any;
+    }
   }
   return config;
 });
