@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
       <InquiryProvider>
-        <HashRouter basename="/Alextronics">
+        <HashRouter>
           <App />
         </HashRouter>
       </InquiryProvider>
