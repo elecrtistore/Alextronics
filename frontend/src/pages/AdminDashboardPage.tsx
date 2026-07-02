@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Product } from '../types/product';
 import { Inquiry } from '../types/inquiry';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/productService';
+import { fetchCategories, Category } from '../services/categoryService';
 import { fetchInquiries } from '../services/inquiryService';
 import api from '../services/api';
 import DiscountModal from '../components/DiscountModal';
-import { ChevronDown, Send, Trash2 } from 'lucide-react';
+import CategoryManager from '../components/CategoryManager';
+import { ChevronDown, Send, Trash2, Plus } from 'lucide-react';
 
 interface SiteContent {
   page: string;
@@ -23,6 +25,7 @@ const adminCards = [
   { id: 'email', title: 'Email & Subscribers', description: 'Manage subscribers and send mass emails', icon: '📧' },
   { id: 'layout', title: 'Page layout', description: 'Rearrange product cards and page sections', icon: '🧩' },
   { id: 'discounts', title: 'Discount builder', description: 'Create a custom price layout with one click', icon: '🏷️' },
+  { id: 'categories', title: 'Categories', description: 'Manage product categories and icons', icon: '🏷️' },
   { id: 'site', title: 'Site Content', description: 'Edit any page (Hero, About, Contact, Footer, Settings)', icon: '📝' },
 ];
 
@@ -51,11 +54,14 @@ function AdminDashboardPage() {
   const [newProduct, setNewProduct] = useState(initialForm);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({ totalProducts: 0, totalInquiries: 0, newInquiries: 0, soldItems: 0 });
   const [formError, setFormError] = useState<string | null>(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [discountTargetId, setDiscountTargetId] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
   const [editImages, setEditImages] = useState<string[]>([]);
   const [editImageInput, setEditImageInput] = useState('');
   const [sitePages, setSitePages] = useState<Record<string, SiteContent>>({});
@@ -89,6 +95,7 @@ function AdminDashboardPage() {
     fetchProducts().then(setProducts).catch(console.error);
     fetchInquiries().then(setInquiries).catch(console.error);
     api.get<DashboardStats>('/dashboard/stats').then((res) => setStats(res.data)).catch(console.error);
+    fetchCategories().then(setCategories).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -200,12 +207,14 @@ function AdminDashboardPage() {
     setEditingProduct(product);
     setEditImages([...product.images]);
     setEditImageInput('');
+    setEditError(null);
   };
 
   const handleCancelEdit = () => {
     setEditingProduct(null);
     setEditImages([]);
     setEditImageInput('');
+    setEditError(null);
   };
 
   const handleAddEditImage = () => {
@@ -232,7 +241,10 @@ function AdminDashboardPage() {
     const price = Number(formData.get('price'));
     const stock = Number(formData.get('stock'));
 
-    if (!name || !brand || !description || !category || !price || !stock || editImages.length === 0) return;
+    if (!name || !brand || !description || !category || editImages.length === 0) {
+      setEditError('Please fill in all required fields and add at least one image.');
+      return;
+    }
 
     try {
       const updated = await updateProduct(editingProduct._id, {
@@ -243,8 +255,9 @@ function AdminDashboardPage() {
       setEditingProduct(null);
       setEditImages([]);
       setEditImageInput('');
-    } catch (err) {
-      console.error('Failed to update product', err);
+      setEditError(null);
+    } catch (err: any) {
+      setEditError(err.response?.data?.message || 'Failed to update product. Please try again.');
     }
   };
 
@@ -506,7 +519,21 @@ function AdminDashboardPage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Category</span>
-                        <input value={newProduct.category} onChange={(event) => updateField('category', event.target.value)} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
+                        <div className="mt-2 flex gap-2">
+                          <select
+                            value={newProduct.category}
+                            onChange={(event) => updateField('category', event.target.value)}
+                            className="w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
+                          >
+                            {categories.length === 0 && <option value="">Select category</option>}
+                            {categories.map((cat) => (
+                              <option key={cat._id} value={cat.name}>{cat.icon} {cat.name}</option>
+                            ))}
+                          </select>
+                          <button type="button" onClick={() => setCategoryManagerOpen(true)} className="rounded-xl bg-charcoal px-4 py-3 text-sm font-semibold text-white hover:bg-charcoal/90 transition" title="Manage categories">
+                            <Plus size={18} />
+                          </button>
+                        </div>
                       </label>
                       <label className="block">
                         <span className="text-sm font-medium text-slate-700">Price (KSh)</span>
@@ -617,7 +644,21 @@ function AdminDashboardPage() {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Category</span>
-                            <input name="category" defaultValue={editingProduct.category} className="mt-2 w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition" />
+                            <div className="mt-2 flex gap-2">
+                              <select
+                                name="category"
+                                defaultValue={editingProduct.category}
+                                className="w-full rounded-xl border border-border bg-slate-50 px-4 py-3 text-sm text-charcoal outline-none focus:border-primary transition"
+                              >
+                                {categories.length === 0 && <option value="">Select category</option>}
+                                {categories.map((cat) => (
+                                  <option key={cat._id} value={cat.name}>{cat.icon} {cat.name}</option>
+                                ))}
+                              </select>
+                              <button type="button" onClick={() => setCategoryManagerOpen(true)} className="rounded-xl bg-charcoal px-4 py-3 text-sm font-semibold text-white hover:bg-charcoal/90 transition" title="Manage categories">
+                                <Plus size={18} />
+                              </button>
+                            </div>
                           </label>
                           <label className="block">
                             <span className="text-sm font-medium text-slate-700">Price (KSh)</span>
@@ -654,6 +695,10 @@ function AdminDashboardPage() {
                             </div>
                           )}
                         </div>
+
+                        {editError && (
+                          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{editError}</div>
+                        )}
 
                         <div className="flex gap-3">
                           <button type="submit" className="flex-1 rounded-full bg-primary px-6 py-4 text-sm font-semibold text-white transition hover:bg-orange-600">Save changes</button>
@@ -744,6 +789,7 @@ function AdminDashboardPage() {
             )}
 
             <DiscountModal open={discountModalOpen} initial={10} onClose={() => { setDiscountModalOpen(false); setDiscountTargetId(null); }} onApply={handleApplyDiscount} />
+            <CategoryManager open={categoryManagerOpen} onClose={() => setCategoryManagerOpen(false)} onCategoriesChanged={() => fetchCategories().then(setCategories).catch(console.error)} />
 
             {activeCard === 'email' && (
               <div className="space-y-6">
@@ -855,6 +901,35 @@ function AdminDashboardPage() {
                     <p className="text-sm text-slate-500">Example</p>
                     <p className="mt-2 text-sm text-slate-700">A 20% discount on KSh 5,400 becomes KSh 4,320.</p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeCard === 'categories' && (
+              <div className="rounded-2xl bg-white border border-border/60 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-charcoal">Categories</h2>
+                    <p className="mt-2 text-sm text-slate-600">Manage the category list used in product forms.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCategoryManagerOpen(true)}
+                    className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
+                  >
+                    Manage
+                  </button>
+                </div>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {categories.map((cat) => (
+                    <div key={cat._id} className="flex items-center gap-3 rounded-xl border border-border bg-slate-50 px-4 py-3">
+                      <span className="text-xl">{cat.icon || '📁'}</span>
+                      <span className="text-sm font-medium text-charcoal">{cat.name}</span>
+                    </div>
+                  ))}
+                  {categories.length === 0 && (
+                    <p className="col-span-full text-sm text-slate-500">No categories defined yet. Click "Manage" to add some.</p>
+                  )}
                 </div>
               </div>
             )}

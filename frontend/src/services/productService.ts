@@ -11,11 +11,6 @@ export async function fetchProductById(id: string) {
   return response.data;
 }
 
-export async function fetchCategories() {
-  const response = await api.get<{ _id: string; name: string; icon: string; image: string }[]>('/categories');
-  return response.data;
-}
-
 export async function createProduct(product: Omit<Product, '_id' | 'createdAt'>) {
   const response = await api.post<Product>('/products', product);
   return response.data;
