@@ -24,10 +24,10 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: npm ci
 
       - name: Build
-        run: cd frontend && npm run build
+        run: npm run build
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL || 'https://alextronics.onrender.com/api' }}
 
