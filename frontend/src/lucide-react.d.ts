@@ -16,6 +16,7 @@ declare module 'lucide-react' {
   export const Star: FC<LucideProps>;
   export const Package: FC<LucideProps>;
   export const CheckCircle: FC<LucideProps>;
+  export const Check: FC<LucideProps>;
   export const ClipboardList: FC<LucideProps>;
   export const ChevronDown: FC<LucideProps>;
   export const Send: FC<LucideProps>;
