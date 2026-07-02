@@ -2,11 +2,17 @@ import Admin from '../models/Admin';
 
 export type AppUserRole = 'Admin' | 'Seller' | 'Buyer';
 
-function parseEmailList(value?: string) {
+export function parseEmailList(value?: string) {
   return (value || '')
     .split(',')
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
+}
+
+export function getConfiguredAdminEmails() {
+  const fallbackEmails = ['alextronics.shop01@gmail.com'];
+  const configuredEmails = parseEmailList(process.env.ADMIN_EMAILS);
+  return Array.from(new Set([...fallbackEmails, ...configuredEmails]));
 }
 
 export async function getRoleForEmail(email?: string, uid?: string): Promise<AppUserRole> {
@@ -18,7 +24,7 @@ export async function getRoleForEmail(email?: string, uid?: string): Promise<App
     if (adminRecord) return 'Admin';
   }
 
-  const adminEmails = parseEmailList(process.env.ADMIN_EMAILS);
+  const adminEmails = getConfiguredAdminEmails();
   if (adminEmails.includes(normalizedEmail)) return 'Admin';
 
   const sellerEmails = parseEmailList(process.env.SELLER_EMAILS);

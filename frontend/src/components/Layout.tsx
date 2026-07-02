@@ -15,6 +15,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const logoSrc = `${import.meta.env.BASE_URL}logo.png`;
   const [scrolled, setScrolled] = useState(false);
   const [shopName, setShopName] = useState('ALEXTRONICS');
   const [logoError, setLogoError] = useState(false);
@@ -58,7 +59,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             {logoError ? (
               <span className="text-lg font-bold text-primary">{shopName}</span>
             ) : (
-              <img src="/logo.png" alt={shopName} className="h-8 w-auto" onError={() => setLogoError(true)} />
+              <img src={logoSrc} alt={shopName} className="h-8 w-auto" onError={() => setLogoError(true)} />
             )}
           </Link>
 

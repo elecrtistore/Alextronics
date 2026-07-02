@@ -1,12 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Admin from '../models/Admin';
-
-function parseEmailList(value?: string) {
-  return (value || '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
+import { getConfiguredAdminEmails } from '../utils/userRoles';
 
 export async function adminGuard(req: Request, res: Response, next: NextFunction) {
   const firebaseUser = res.locals.firebaseUser;
@@ -17,7 +11,7 @@ export async function adminGuard(req: Request, res: Response, next: NextFunction
   const adminRecord = await Admin.findOne({ firebaseUID: firebaseUser.uid });
   if (adminRecord) return next();
 
-  const adminEmails = parseEmailList(process.env.ADMIN_EMAILS);
+  const adminEmails = getConfiguredAdminEmails();
   if (firebaseUser.email && adminEmails.includes(firebaseUser.email.trim().toLowerCase())) {
     return next();
   }
