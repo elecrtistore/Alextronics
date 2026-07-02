@@ -51,7 +51,11 @@ export async function signup(req: Request, res: Response) {
       return res.status(403).json({ message: 'Invalid admin code.' });
     }
 
-    await Admin.create({ firebaseUID: firebaseUser.uid, email: firebaseUser.email, role: 'admin' });
+    await Admin.findOneAndUpdate(
+      { firebaseUID: firebaseUser.uid },
+      { firebaseUID: firebaseUser.uid, email: firebaseUser.email, role: 'admin' },
+      { upsert: true, new: true }
+    );
   }
 
   const assignedRole = role === 'Admin' ? 'Admin' : await getRoleForEmail(firebaseUser.email, firebaseUser.uid);

@@ -9,7 +9,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { UserProfile, UserRole } from '../types/user';
-import { fetchProfile, assignRole } from '../services/authService';
+import { fetchProfile, assignRole, AuthProfile } from '../services/authService';
 
 interface AuthContextValue {
   user: UserProfile | null;
@@ -94,8 +94,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (adminCode) {
       const fbUser = auth.currentUser;
       if (fbUser) {
-        storeRole('Admin');
-        setUser(buildFallbackProfile(fbUser, 'Admin'));
+        const token = await fbUser.getIdToken();
+        try {
+          const profile: AuthProfile = await assignRole(token, 'Admin', adminCode, fbUser.displayName || undefined);
+          storeRole(profile.role);
+          setUser(profile);
+        } catch {
+          storeRole('Admin');
+          setUser(buildFallbackProfile(fbUser, 'Admin'));
+        }
       }
     }
   };
