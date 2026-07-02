@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import { getAuth } from 'firebase/auth';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL

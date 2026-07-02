@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pendingRole = useRef<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser: FirebaseUser | null) => {
       setFirebaseUser(fbUser);
       if (fbUser) {
         if (pendingRole.current) {
