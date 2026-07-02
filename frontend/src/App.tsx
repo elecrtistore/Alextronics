@@ -15,6 +15,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import MyInquiriesPage from './pages/MyInquiriesPage';
+import MessagingPage from './pages/MessagingPage';
 import Layout from './components/Layout';
 
 function RoleGuard({ allowed, children }: { allowed: UserRole[]; children: JSX.Element }) {
@@ -46,6 +47,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/admin" element={<RoleGuard allowed={['Admin']}><AdminDashboardPage /></RoleGuard>} />
+          <Route path="/messages" element={<MessagingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contacts" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />

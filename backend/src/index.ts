@@ -14,7 +14,9 @@ import dashboardRoutes from './routes/dashboardRoutes';
 import authRoutes from './routes/authRoutes';
 import siteRoutes from './routes/siteRoutes';
 import emailRoutes from './routes/emailRoutes';
+import chatRoutes from './routes/chatRoutes';
 import { errorHandler } from './middleware/errorHandler';
+import { setupChat } from './chat';
 import { initializeApp, getApps, cert } from 'firebase-admin';
 import fs from 'fs';
 import path from 'path';
@@ -139,11 +141,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/site', siteRoutes);
 app.use('/api/email', emailRoutes);
+app.use('/api/chat', chatRoutes);
 app.use(errorHandler);
 
-io.on('connection', (socket) => {
-  console.log('Socket connected:', socket.id);
-});
+setupChat(io);
 
 const port = process.env.PORT || 5000;
 

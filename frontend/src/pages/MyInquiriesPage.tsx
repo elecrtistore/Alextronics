@@ -1,15 +1,36 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Inquiry } from '../types/inquiry';
 import { fetchMyInquiries, updateInquiryStatus } from '../services/inquiryService';
-import { ClipboardList, Package, Clock, CheckCircle } from 'lucide-react';
+import { createConversation } from '../services/chatService';
+import { useAuth } from '../contexts/AuthContext';
+import { ClipboardList, Package, Clock, CheckCircle, MessageCircle } from 'lucide-react';
 
 function MyInquiriesPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMyInquiries().then(setInquiries).catch(console.error).finally(() => setLoading(false));
   }, []);
+
+  const handleChat = async (inquiry: Inquiry) => {
+    try {
+      const conv = await createConversation({
+        participantId: 'admin',
+        participantRole: 'Admin',
+        participantName: 'ALEXTRONICS',
+        inquiryId: inquiry._id,
+        productId: inquiry.items[0]?.productId,
+        productName: inquiry.items[0]?.name,
+      });
+      navigate('/messages');
+    } catch {
+      navigate('/messages');
+    }
+  };
 
   if (loading) return <div className="pt-24 min-h-screen flex items-center justify-center"><div className="animate-pulse text-soft">Loading...</div></div>;
 
