@@ -24,13 +24,13 @@ jobs:
           cache: 'npm'
 
       - name: Install & build backend
-        working-directory: ./backend
+        working-directory: backend
         run: |
           npm ci
           npm run build
 
       - name: Install & build frontend
-        working-directory: ./frontend
+        working-directory: frontend
         run: |
           npm ci
           npm run build
