@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Product } from '../types/product';
 import { Inquiry } from '../types/inquiry';
-import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/productService';
+import { fetchProducts, createProduct, importProducts, updateProduct, deleteProduct } from '../services/productService';
 import { fetchCategories, Category } from '../services/categoryService';
 import { fetchInquiries } from '../services/inquiryService';
 import api from '../services/api';
@@ -34,6 +34,12 @@ interface DashboardStats {
   totalInquiries: number;
   newInquiries: number;
   soldItems: number;
+}
+
+interface ImportErrorDetail {
+  row: number;
+  field?: string;
+  message: string;
 }
 
 const initialForm = {
@@ -71,6 +77,11 @@ function AdminDashboardPage() {
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
   const [subscribersError, setSubscribersError] = useState('');
+  const [csvText, setCsvText] = useState('');
+  const [csvPreview, setCsvPreview] = useState<string[]>([]);
+  const [importingProducts, setImportingProducts] = useState(false);
+  const [importResult, setImportResult] = useState<{ created: number; skipped: number; errors: ImportErrorDetail[] } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   const [emailTemplate, setEmailTemplate] = useState('custom');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
@@ -140,6 +151,78 @@ function AdminDashboardPage() {
     if (!nextUrl) return;
     setImageUrls((current) => [...current, nextUrl]);
     setNewProduct((current) => ({ ...current, imageUrl: '' }));
+  };
+
+  const downloadCsvTemplate = () => {
+    const template = ['name,brand,category,description,price,stock,images', 'Example Lamp,Acme,Lighting,Compact LED lamp,2499,10,https://example.com/one.jpg;https://example.com/two.jpg'].join('\n');
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'product-import-template.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleCsvFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setCsvText('');
+      setCsvPreview([]);
+      setImportResult(null);
+      setImportError(null);
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const rows = text.split(/\r?\n/).filter((row) => row.trim());
+      if (rows.length > 101) {
+        setCsvText('');
+        setCsvPreview([]);
+        setImportResult(null);
+        setImportError('Please keep each import batch to 100 products or fewer for a safer upload.');
+        return;
+      }
+      setCsvText(text);
+      setCsvPreview(rows.slice(0, 5));
+      setImportError(null);
+    } catch (err) {
+      setCsvText('');
+      setCsvPreview([]);
+      setImportError('Could not read the selected CSV file. Please try again.');
+    }
+  };
+
+  const handleImportProducts = async () => {
+    if (!csvText.trim()) {
+      setImportError('Choose a CSV file first.');
+      return;
+    }
+
+    const rows = csvText.split(/\r?\n/).filter((row) => row.trim());
+    if (rows.length > 101) {
+      setImportError('Please keep each import batch to 100 products or fewer for a safer upload.');
+      return;
+    }
+
+    setImportingProducts(true);
+    setImportError(null);
+    setImportResult(null);
+
+    try {
+      const result = await importProducts(csvText);
+      setProducts((current) => [...result.products, ...current]);
+      setImportResult({ created: result.created, skipped: result.skipped, errors: result.errors });
+      setCsvText('');
+      setCsvPreview([]);
+      const fileInput = document.getElementById('csv-product-import') as HTMLInputElement | null;
+      if (fileInput) fileInput.value = '';
+    } catch (err: any) {
+      setImportError(err.response?.data?.message || 'Import failed. Please try again.');
+    } finally {
+      setImportingProducts(false);
+    }
   };
 
   const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -501,6 +584,61 @@ function AdminDashboardPage() {
                       <p className="mt-2 text-sm text-slate-600">Upload product details, set a price, and add one or more image URLs.</p>
                     </div>
                   </div>
+
+                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-charcoal">Bulk import from CSV</h3>
+                        <p className="mt-1 text-sm text-slate-600">Upload a spreadsheet with columns like name, brand, category, price, stock, description, and images. The batch stays resilient even when optional cells are blank.</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={downloadCsvTemplate} className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-charcoal transition hover:bg-slate-100">
+                          Download template
+                        </button>
+                        <label className="inline-flex cursor-pointer items-center justify-center rounded-full bg-charcoal px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                          <span>Choose CSV</span>
+                          <input id="csv-product-import" type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvFileChange} />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-slate-500">Best results come from batches of 50-100 rows. Missing optional values are filled safely so the rest of the import still completes.</p>
+                    </div>
+
+                    {importError && (
+                      <div className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{importError}</div>
+                    )}
+
+                    {importResult && (
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        <p className="font-semibold">Imported {importResult.created} product{importResult.created === 1 ? '' : 's'}.</p>
+                        {importResult.skipped > 0 && <p className="mt-1">{importResult.skipped} row{importResult.skipped === 1 ? '' : 's'} were skipped.</p>}
+                        {importResult.errors.length > 0 && (
+                          <div className="mt-2">
+                            <p className="font-medium">Skipped rows:</p>
+                            <ul className="mt-2 list-disc space-y-1 pl-5">
+                              {importResult.errors.slice(0, 8).map((error, index) => (
+                                <li key={`${error.row}-${index}`}>Row {error.row}: {error.message}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {csvPreview.length > 0 && (
+                      <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-white p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Preview</p>
+                        <div className="mt-2 flex flex-col gap-2">
+                          {csvPreview.map((row, index) => (
+                            <code key={`${row}-${index}`} className="whitespace-nowrap text-xs text-slate-600">{row}</code>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <form onSubmit={handleAddProduct} className="mt-6 grid gap-5">
                     {formError && (
                       <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{formError}</div>
