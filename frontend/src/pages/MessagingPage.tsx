@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useConversations } from '../hooks/useConversations';
 import { useSocket } from '../hooks/useSocket';
@@ -7,10 +8,24 @@ import ChatWindow from '../components/MessagingPage/ChatWindow';
 import BusinessPanel from '../components/MessagingPage/BusinessPanel';
 
 export default function MessagingPage() {
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { conversations, loading } = useConversations();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = conversations.find(c => c._id === selectedId) || null;
+
+  useEffect(() => {
+    if (loading) return;
+    if (selectedId) return;
+    const requestedConversation = searchParams.get('conversation');
+    if (requestedConversation && conversations.some((c) => c._id === requestedConversation)) {
+      setSelectedId(requestedConversation);
+      return;
+    }
+    if (conversations.length > 0) {
+      setSelectedId(conversations[0]._id);
+    }
+  }, [conversations, loading, searchParams, selectedId]);
 
   return (
     <div className="pt-20 h-screen flex flex-col bg-[#F8FAFC]">

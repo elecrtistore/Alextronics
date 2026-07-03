@@ -28,6 +28,7 @@ function HomePage() {
     : products.slice(0, 6);
 
   const productCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
+  const visibleCategories = productCategories.slice(0, 4);
   const brandList = [...new Set(products.map(p => p.brand).filter(Boolean))].slice(0, 8);
   const displayBrands = brandList.length > 0 ? brandList : ['Samsung', 'Apple', 'Sony', 'LG', 'Dell', 'HP', 'Lenovo', 'JBL'];
 
@@ -104,8 +105,8 @@ function HomePage() {
             <h2 className="text-2xl font-bold text-charcoal">Categories</h2>
             <Link to="/shop" className="text-sm font-semibold text-primary hover:text-primary-hover transition">View all</Link>
           </div>
-          <div className="flex flex-wrap gap-3">
-            {productCategories.length > 0 ? productCategories.map((cat) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {visibleCategories.length > 0 ? visibleCategories.map((cat) => (
               <Link key={cat} to={`/shop?category=${cat}`} className="rounded-full border border-border bg-white px-5 py-2.5 text-sm font-medium text-charcoal hover:bg-primary hover:text-white hover:border-primary transition">
                 {cat}
               </Link>

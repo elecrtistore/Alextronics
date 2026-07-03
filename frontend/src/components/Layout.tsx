@@ -82,10 +82,10 @@ function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-3">
-                <span className="hidden sm:block text-sm font-medium text-soft">
+                <span className="text-sm font-medium text-soft">
                   {user.displayName || user.email}
                 </span>
                 <button onClick={logout} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition">
@@ -97,7 +97,10 @@ function Layout({ children }: { children: React.ReactNode }) {
                 Sign in
               </Link>
             )}
-            <button onClick={() => setOpen(!open)} className="md:hidden p-2 rounded-full text-charcoal transition">
+          </div>
+
+          <div className="md:hidden">
+            <button onClick={() => setOpen(!open)} className="p-2 rounded-full text-charcoal transition">
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -111,6 +114,20 @@ function Layout({ children }: { children: React.ReactNode }) {
                   {link.label}
                 </NavLink>
               ))}
+            </div>
+            <div className="border-t border-border px-6 py-4">
+              {user ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-charcoal">{user.displayName || user.email}</p>
+                  <button onClick={logout} className="w-full rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="w-full inline-flex justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
+                  Sign in
+                </Link>
+              )}
             </div>
           </div>
         )}

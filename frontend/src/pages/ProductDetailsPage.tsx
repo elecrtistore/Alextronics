@@ -31,6 +31,7 @@ function ProductDetailsPage() {
   }
 
   const discounted = product.discount ? Math.round(product.price * (1 - product.discount / 100)) : null;
+  const imageUrl = product.images[selectedImage] ?? product.images[0] ?? '';
 
   return (
     <div className="pt-20 min-h-screen bg-white">
@@ -43,7 +44,11 @@ function ProductDetailsPage() {
           {/* GALLERY */}
           <div className="space-y-4">
             <div className="aspect-[4/3] rounded-2xl bg-slate-50 overflow-hidden">
-              <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-contain p-4" />
+              {imageUrl ? (
+                <img src={imageUrl} alt={product.name} className="w-full h-full object-contain p-4" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-soft">No image available</div>
+              )}
             </div>
             {product.images.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2">

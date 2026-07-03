@@ -21,11 +21,13 @@ export async function createInquiry(req: Request, res: Response) {
     return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
   }
 
-  const { customer, items, estimatedTotal } = req.body;
   const firebaseUser = res.locals.firebaseUser;
-  const firebaseUID = firebaseUser?.uid || '';
+  if (!firebaseUser) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
-  const inquiry = await Inquiry.create({ firebaseUID, customer, items, estimatedTotal });
+  const { customer, items, estimatedTotal } = req.body;
+  const inquiry = await Inquiry.create({ firebaseUID: firebaseUser.uid, customer, items, estimatedTotal });
   res.status(201).json(inquiry);
 }
 

@@ -47,7 +47,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/admin" element={<RoleGuard allowed={['Admin']}><AdminDashboardPage /></RoleGuard>} />
-          <Route path="/messages" element={<MessagingPage />} />
+          <Route path="/messages" element={<RoleGuard allowed={['Buyer', 'Seller', 'Admin']}><MessagingPage /></RoleGuard>} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contacts" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />

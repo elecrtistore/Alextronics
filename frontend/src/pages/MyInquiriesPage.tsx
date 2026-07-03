@@ -7,14 +7,20 @@ import { useAuth } from '../contexts/AuthContext';
 import { ClipboardList, Package, Clock, CheckCircle, MessageCircle } from 'lucide-react';
 
 function MyInquiriesPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     fetchMyInquiries().then(setInquiries).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [user, authLoading]);
 
   const handleChat = async (inquiry: Inquiry) => {
     try {
@@ -26,7 +32,7 @@ function MyInquiriesPage() {
         productId: inquiry.items[0]?.productId,
         productName: inquiry.items[0]?.name,
       });
-      navigate('/messages');
+      navigate(`/messages?conversation=${conv._id}`);
     } catch {
       navigate('/messages');
     }
@@ -101,9 +107,17 @@ function MyInquiriesPage() {
                     ))}
                   </tbody>
                 </table>
-                <div className="flex items-center justify-between pt-2 border-t border-border">
-                  <span className="text-xs text-soft">Total</span>
-                  <span className="text-base font-bold text-charcoal">KSh {inquiry.estimatedTotal.toLocaleString()}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-border">
+                  <button
+                    onClick={() => handleChat(inquiry)}
+                    className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition"
+                  >
+                    <MessageCircle size={16} /> Chat about inquiry
+                  </button>
+                  <div className="text-right">
+                    <p className="text-xs text-soft">Total</p>
+                    <p className="text-base font-bold text-charcoal">KSh {inquiry.estimatedTotal.toLocaleString()}</p>
+                  </div>
                 </div>
               </div>
             ))}

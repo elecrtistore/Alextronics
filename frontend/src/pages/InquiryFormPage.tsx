@@ -1,27 +1,61 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
 import { submitInquiry } from '../services/inquiryService';
+import { createConversation } from '../services/chatService';
 import { User, Phone as PhoneIcon, ShoppingBag, ArrowLeft } from 'lucide-react';
 
 function InquiryFormPage() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { items, totalAmount, clear } = useInquiry();
   const [form, setForm] = useState({ name: '', phone: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (user?.displayName && !form.name) {
+      setForm((prev) => ({ ...prev, name: prev.name || user.displayName || '' }));
+    }
+  }, [user?.displayName]);
+
+  useEffect(() => {
+    if (!authLoading && !user && items.length > 0) {
+      setError('Sign in before submitting your inquiry.');
+    }
+  }, [authLoading, user, items.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) { setError('Your inquiry cart is empty.'); return; }
     setSubmitting(true); setError('');
     try {
-      await submitInquiry({
+      const inquiry = await submitInquiry({
         customer: { name: form.name, phone: form.phone },
         items: items.map((i) => ({ productId: i.productId, name: i.name, quantity: i.quantity, price: i.price })),
         estimatedTotal: totalAmount
       });
+
       clear();
+
+      if (user) {
+        try {
+          const conv = await createConversation({
+            participantId: 'admin',
+            participantRole: 'Admin',
+            participantName: 'ALEXTRONICS',
+            inquiryId: inquiry._id,
+            productId: items[0]?.productId,
+            productName: items[0]?.name,
+          });
+          navigate(`/messages?conversation=${conv._id}`);
+          return;
+        } catch {
+          // fall through to success page if chat creation fails
+        }
+      }
+
       navigate('/success');
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Failed to submit.');
@@ -36,6 +70,19 @@ function InquiryFormPage() {
           <h1 className="text-2xl font-bold text-charcoal">No items to submit</h1>
           <p className="text-soft text-sm">Add products to your inquiry cart first.</p>
           <button onClick={() => navigate('/shop')} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">Go to store</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authLoading && !user) {
+    return (
+      <div className="pt-24 min-h-screen flex items-center justify-center px-6">
+        <div className="text-center space-y-4">
+          <ShoppingBag size={48} className="text-soft mx-auto" />
+          <h1 className="text-2xl font-bold text-charcoal">Please sign in</h1>
+          <p className="text-soft text-sm">You must be signed in to submit an inquiry and start a chat.</p>
+          <button onClick={() => navigate('/login')} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">Sign in</button>
         </div>
       </div>
     );
