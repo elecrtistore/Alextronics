@@ -42,6 +42,53 @@ interface ImportErrorDetail {
   message: string;
 }
 
+function parseCsvText(content: string) {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < content.length; index += 1) {
+    const char = content[index];
+
+    if (char === '"') {
+      if (inQuotes && content[index + 1] === '"') {
+        currentCell += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      currentRow.push(currentCell);
+      currentCell = '';
+      continue;
+    }
+
+    if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (char === '\r' && content[index + 1] === '\n') {
+        index += 1;
+      }
+      currentRow.push(currentCell);
+      rows.push(currentRow);
+      currentRow = [];
+      currentCell = '';
+      continue;
+    }
+
+    currentCell += char;
+  }
+
+  if (currentCell.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentCell);
+    rows.push(currentRow);
+  }
+
+  return rows.filter((row) => row.some((cell) => cell.trim().length > 0));
+}
+
 const initialForm = {
   name: '',
   brand: '',
@@ -78,7 +125,8 @@ function AdminDashboardPage() {
   const [subscribersLoading, setSubscribersLoading] = useState(false);
   const [subscribersError, setSubscribersError] = useState('');
   const [csvText, setCsvText] = useState('');
-  const [csvPreview, setCsvPreview] = useState<string[]>([]);
+  const [csvPreviewRows, setCsvPreviewRows] = useState<string[][]>([]);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [importingProducts, setImportingProducts] = useState(false);
   const [importResult, setImportResult] = useState<{ created: number; skipped: number; errors: ImportErrorDetail[] } | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -168,7 +216,8 @@ function AdminDashboardPage() {
     const file = event.target.files?.[0];
     if (!file) {
       setCsvText('');
-      setCsvPreview([]);
+      setCsvPreviewRows([]);
+      setCsvHeaders([]);
       setImportResult(null);
       setImportError(null);
       return;
@@ -176,20 +225,23 @@ function AdminDashboardPage() {
 
     try {
       const text = await file.text();
-      const rows = text.split(/\r?\n/).filter((row) => row.trim());
+      const rows = parseCsvText(text);
       if (rows.length > 101) {
         setCsvText('');
-        setCsvPreview([]);
+        setCsvPreviewRows([]);
+        setCsvHeaders([]);
         setImportResult(null);
         setImportError('Please keep each import batch to 100 products or fewer for a safer upload.');
         return;
       }
       setCsvText(text);
-      setCsvPreview(rows.slice(0, 5));
+      setCsvPreviewRows(rows);
+      setCsvHeaders(rows[0] || []);
       setImportError(null);
     } catch (err) {
       setCsvText('');
-      setCsvPreview([]);
+      setCsvPreviewRows([]);
+      setCsvHeaders([]);
       setImportError('Could not read the selected CSV file. Please try again.');
     }
   };
@@ -200,7 +252,7 @@ function AdminDashboardPage() {
       return;
     }
 
-    const rows = csvText.split(/\r?\n/).filter((row) => row.trim());
+    const rows = parseCsvText(csvText);
     if (rows.length > 101) {
       setImportError('Please keep each import batch to 100 products or fewer for a safer upload.');
       return;
@@ -215,7 +267,8 @@ function AdminDashboardPage() {
       setProducts((current) => [...result.products, ...current]);
       setImportResult({ created: result.created, skipped: result.skipped, errors: result.errors });
       setCsvText('');
-      setCsvPreview([]);
+      setCsvPreviewRows([]);
+      setCsvHeaders([]);
       const fileInput = document.getElementById('csv-product-import') as HTMLInputElement | null;
       if (fileInput) fileInput.value = '';
     } catch (err: any) {
@@ -604,6 +657,9 @@ function AdminDashboardPage() {
 
                     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-slate-500">Best results come from batches of 50-100 rows. Missing optional values are filled safely so the rest of the import still completes.</p>
+                      <button type="button" onClick={handleImportProducts} disabled={importingProducts || !csvText.trim()} className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-300">
+                        {importingProducts ? 'Importing…' : 'Import Products'}
+                      </button>
                     </div>
 
                     {importError && (
@@ -627,13 +683,38 @@ function AdminDashboardPage() {
                       </div>
                     )}
 
-                    {csvPreview.length > 0 && (
-                      <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-white p-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Preview</p>
-                        <div className="mt-2 flex flex-col gap-2">
-                          {csvPreview.map((row, index) => (
-                            <code key={`${row}-${index}`} className="whitespace-nowrap text-xs text-slate-600">{row}</code>
-                          ))}
+                    {csvPreviewRows.length > 0 && (
+                      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-white">
+                        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">CSV Preview</p>
+                            <p className="mt-1 text-sm text-slate-600">Showing all rows and columns. Scroll horizontally or vertically to inspect the full file.</p>
+                          </div>
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{csvPreviewRows.length - 1} rows</span>
+                        </div>
+                        <div className="max-h-[420px] overflow-auto">
+                          <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
+                            <thead className="sticky top-0 bg-slate-50">
+                              <tr>
+                                {csvHeaders.map((header, index) => (
+                                  <th key={`${header}-${index}`} className="whitespace-nowrap border-r border-slate-200 px-3 py-2 font-semibold text-slate-700">
+                                    {header || `Column ${index + 1}`}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 bg-white">
+                              {csvPreviewRows.slice(1).map((row, rowIndex) => (
+                                <tr key={`${row.join('-')}-${rowIndex}`} className="odd:bg-white even:bg-slate-50/70">
+                                  {csvHeaders.map((_, columnIndex) => (
+                                    <td key={`${rowIndex}-${columnIndex}`} className="max-w-[220px] whitespace-nowrap border-r border-slate-100 px-3 py-2 text-slate-600" title={row[columnIndex] || ''}>
+                                      <span className="block overflow-hidden text-ellipsis">{row[columnIndex] || ''}</span>
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     )}
