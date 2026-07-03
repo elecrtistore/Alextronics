@@ -2,10 +2,12 @@ import { Server, Socket } from 'socket.io';
 import { getAuth } from 'firebase-admin/auth';
 import Conversation from './models/Conversation';
 import Message from './models/Message';
+import Admin from './models/Admin';
 
 interface AuthSocket extends Socket {
   firebaseUid?: string;
   firebaseRole?: string;
+  firebaseIsAdmin?: boolean;
 }
 
 export function setupChat(io: Server) {
@@ -16,6 +18,8 @@ export function setupChat(io: Server) {
       const decoded = await getAuth().verifyIdToken(token);
       socket.firebaseUid = decoded.uid;
       socket.firebaseRole = (decoded as any).role || 'Buyer';
+      const adminRecord = await Admin.findOne({ firebaseUID: decoded.uid });
+      socket.firebaseIsAdmin = !!adminRecord;
       next();
     } catch {
       next(new Error('Invalid token'));
@@ -37,7 +41,7 @@ export function setupChat(io: Server) {
       const conv = await Conversation.findById(conversationId);
       if (!conv) return socket.emit('error', 'Conversation not found');
       const isParticipant = conv.participants.some(p => p.userId === uid);
-      if (!isParticipant) return socket.emit('error', 'Not a participant');
+      if (!isParticipant && !socket.firebaseIsAdmin) return socket.emit('error', 'Not a participant');
       socket.join(conversationId);
     });
 
@@ -49,7 +53,10 @@ export function setupChat(io: Server) {
       if (!text?.trim()) return;
       const conv = await Conversation.findById(conversationId);
       if (!conv) return socket.emit('error', 'Conversation not found');
-      const participant = conv.participants.find(p => p.userId === socket.firebaseUid);
+      let participant = conv.participants.find(p => p.userId === socket.firebaseUid);
+      if (!participant && socket.firebaseIsAdmin) {
+        participant = conv.participants.find(p => p.userId === 'admin') || conv.participants[0];
+      }
       if (!participant) return socket.emit('error', 'Not a participant');
 
       const message = await Message.create({
@@ -81,7 +88,7 @@ export function setupChat(io: Server) {
       const conv = await Conversation.findById(conversationId);
       if (!conv) return;
       const isParticipant = conv.participants.some(p => p.userId === uid);
-      if (!isParticipant) return;
+      if (!isParticipant && !socket.firebaseIsAdmin) return;
 
       await Message.updateMany(
         { conversationId, 'readBy.userId': { $ne: uid } },
