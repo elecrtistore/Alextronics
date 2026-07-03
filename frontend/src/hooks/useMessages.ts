@@ -5,7 +5,7 @@ import { useSocket } from './useSocket';
 export function useMessages(conversationId: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const socketRef = useSocket();
+  const socket = useSocket();
   const joinedRef = useRef(false);
 
   const load = useCallback(async () => {
@@ -27,7 +27,6 @@ export function useMessages(conversationId: string | null) {
   }, [conversationId, load]);
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket || !conversationId) return;
 
     if (!joinedRef.current) {
@@ -57,19 +56,17 @@ export function useMessages(conversationId: string | null) {
       socket.off('message:new', handleNew);
       socket.off('message:read', handleRead);
     };
-  }, [socketRef, conversationId]);
+  }, [socket, conversationId]);
 
   const sendMessage = useCallback((text: string) => {
-    const socket = socketRef.current;
     if (!socket || !conversationId) return;
     socket.emit('message:send', { conversationId, text });
-  }, [socketRef, conversationId]);
+  }, [socket, conversationId]);
 
   const markRead = useCallback(() => {
-    const socket = socketRef.current;
     if (!socket || !conversationId) return;
     socket.emit('message:read', { conversationId });
-  }, [socketRef, conversationId]);
+  }, [socket, conversationId]);
 
   return { messages, loading, sendMessage, markRead, reload: load };
 }

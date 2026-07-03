@@ -7,7 +7,7 @@ export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(true);
-  const socketRef = useSocket();
+  const socket = useSocket();
   const { firebaseUser, loading: authLoading } = useAuth();
 
   const load = useCallback(async () => {
@@ -24,7 +24,6 @@ export function useConversations() {
   }, []);
 
   useEffect(() => {
-    // wait for auth to initialize and for a signed-in firebase user
     if (authLoading) return;
     if (!firebaseUser) {
       setLoading(false);
@@ -34,9 +33,7 @@ export function useConversations() {
   }, [load, firebaseUser, authLoading]);
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
-    // only listen for socket events when user is authenticated
     if (!firebaseUser) return;
 
     const handler = () => {
@@ -44,7 +41,7 @@ export function useConversations() {
     };
     socket.on('conversation:updated', handler);
     return () => { socket.off('conversation:updated', handler); };
-  }, [socketRef, load]);
+  }, [socket, load, firebaseUser]);
 
   return { conversations, unread, loading, reload: load };
 }

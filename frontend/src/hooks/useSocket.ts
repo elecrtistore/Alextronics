@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -10,11 +10,11 @@ const SOCKET_URL = import.meta.env.VITE_API_URL
 let globalSocket: Socket | null = null;
 
 export function useSocket() {
-  const socketRef = useRef<Socket | null>(globalSocket);
+  const [socket, setSocket] = useState<Socket | null>(globalSocket);
 
   useEffect(() => {
     if (globalSocket?.connected) {
-      socketRef.current = globalSocket;
+      setSocket(globalSocket);
       return;
     }
 
@@ -22,20 +22,22 @@ export function useSocket() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) return;
       user.getIdToken().then((token) => {
-        if (globalSocket?.connected) return;
+        if (globalSocket?.connected) {
+          setSocket(globalSocket);
+          return;
+        }
+
         const s = io(SOCKET_URL, {
           auth: { token },
           transports: ['websocket', 'polling'] as any
         });
         globalSocket = s;
-        socketRef.current = s;
+        setSocket(s);
       });
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
-  return socketRef;
+  return socket;
 }
