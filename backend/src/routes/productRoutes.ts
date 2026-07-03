@@ -7,6 +7,7 @@ const router = Router();
 
 router.get('/', productController.getProducts);
 router.get('/:id', productController.getProductById);
+router.post('/normalize-stock', validateFirebaseToken, adminGuard, productController.normalizeExistingProductStock);
 router.post('/import', validateFirebaseToken, adminGuard, productController.importProducts);
 router.post('/', validateFirebaseToken, adminGuard, productController.validateProduct, productController.createProduct);
 router.put('/:id', validateFirebaseToken, adminGuard, productController.updateProduct);

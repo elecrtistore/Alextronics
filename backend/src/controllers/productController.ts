@@ -185,6 +185,15 @@ export async function getProducts(req: Request, res: Response) {
   res.json(products.map(sanitizeProduct));
 }
 
+export async function normalizeExistingProductStock(req: Request, res: Response) {
+  const result = await Product.updateMany(
+    { $or: [{ stock: { $exists: false } }, { stock: null }, { stock: 0 }] },
+    { $set: { stock: 1 } }
+  );
+
+  res.json({ updated: result.modifiedCount || result.matchedCount || 0 });
+}
+
 export async function getProductById(req: Request, res: Response) {
   const product = await Product.findById(req.params.id);
   if (!product) return res.status(404).json({ message: 'Product not found' });

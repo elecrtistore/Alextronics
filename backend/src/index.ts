@@ -20,6 +20,7 @@ import { setupChat } from './chat';
 import { initializeApp, getApps, cert } from 'firebase-admin';
 import fs from 'fs';
 import path from 'path';
+import Product from './models/Product';
 
 dotenv.config();
 
@@ -148,8 +149,21 @@ setupChat(io);
 
 const port = process.env.PORT || 5000;
 
+async function normalizeExistingProductStock() {
+  try {
+    const result = await Product.updateMany(
+      { $or: [{ stock: { $exists: false } }, { stock: null }, { stock: 0 }] },
+      { $set: { stock: 1 } }
+    );
+    console.log(`Normalized product stock for ${result.modifiedCount || result.matchedCount || 0} existing products`);
+  } catch (error) {
+    console.error('Failed to normalize existing product stock', error);
+  }
+}
+
 connectDatabase(process.env.MONGODB_URI || '')
-  .then(() => {
+  .then(async () => {
+    await normalizeExistingProductStock();
     server.listen(port, () => {
       console.log(`Server listening on http://localhost:${port}`);
     });

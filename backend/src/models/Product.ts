@@ -8,7 +8,7 @@ const productSchema = new Schema({
   category: { type: String, required: true },
   price: { type: Number, required: true },
   discount: { type: Number, default: 0 },
-  stock: { type: Number, default: 0 },
+  stock: { type: Number, default: 1 },
   sellerName: { type: String, required: true },
   sellerPhone: { type: String, required: true },
   sellerWhatsapp: { type: String, required: true },
