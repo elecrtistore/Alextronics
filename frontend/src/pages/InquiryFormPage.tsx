@@ -28,7 +28,7 @@ function InquiryFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (items.length === 0) { setError('Your inquiry cart is empty.'); return; }
+    if (items.length === 0) { setError('Your cart is empty.'); return; }
     setSubmitting(true); setError('');
     try {
       const inquiry = await submitInquiry({
@@ -68,7 +68,7 @@ function InquiryFormPage() {
         <div className="text-center space-y-4">
           <ShoppingBag size={48} className="text-soft mx-auto" />
           <h1 className="text-2xl font-bold text-charcoal">No items to submit</h1>
-          <p className="text-soft text-sm">Add products to your inquiry cart first.</p>
+          <p className="text-soft text-sm">Add products to your cart first.</p>
           <button onClick={() => navigate('/shop')} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">Go to store</button>
         </div>
       </div>

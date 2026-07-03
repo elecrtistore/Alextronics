@@ -121,7 +121,7 @@ function ProductDetailsPage() {
             <div className="flex gap-3">
               <button onClick={() => { addItem(product); navigate('/inquiry-list'); }}
                 className="flex-1 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
-                <ShoppingCart size={16} /> Add to Inquiry
+                <ShoppingCart size={16} /> Add to Cart
               </button>
               <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"
                 className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">

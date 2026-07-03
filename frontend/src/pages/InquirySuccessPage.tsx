@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useInquiry } from '../contexts/InquiryContext';
-import { CheckCircle, ArrowRight, ClipboardList } from 'lucide-react';
+import { CheckCircle, ArrowRight, MessageCircle } from 'lucide-react';
 
 function InquirySuccessPage() {
   const { clear } = useInquiry();
@@ -19,8 +19,8 @@ function InquirySuccessPage() {
           <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
             Continue shopping <ArrowRight size={16} />
           </Link>
-          <Link to="/my-inquiries" className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition">
-            <ClipboardList size={16} /> My inquiries
+          <Link to="/messages" className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition">
+            <MessageCircle size={16} /> Messages
           </Link>
         </div>
       </div>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Menu, X } from 'lucide-react';
+import { useInquiry } from '../contexts/InquiryContext';
+import { Menu, X, ShoppingCart } from 'lucide-react';
 import api from '../services/api';
 import CookieConsent from './CookieConsent';
 
@@ -13,6 +14,7 @@ interface SiteContent {
 
 function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const { totalItems } = useInquiry();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const logoSrc = `${import.meta.env.BASE_URL}logo.png`;
@@ -42,8 +44,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { to: '/shop', label: 'Shop' },
-    ...(user?.role !== 'Admin' ? [{ to: '/inquiry-list', label: 'Inquiry Cart' }] : []),
-    ...(user ? [{ to: '/my-inquiries', label: 'My Inquiries' }] : []),
+    ...(user?.role !== 'Admin' ? [{ to: '/inquiry-list', label: 'Cart' }] : []),
     ...(user ? [{ to: '/messages', label: 'Messages' }] : []),
     { to: '/about', label: 'About' },
     { to: '/contacts', label: 'Contacts' },
@@ -77,7 +78,19 @@ function Layout({ children }: { children: React.ReactNode }) {
                   }`
                 }
               >
-                {link.label}
+                {link.to === '/inquiry-list' ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <ShoppingCart size={16} />
+                    {link.label}
+                    {totalItems > 0 && (
+                      <span className="bg-primary text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                        {totalItems > 99 ? '99+' : totalItems}
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  link.label
+                )}
               </NavLink>
             ))}
           </nav>
@@ -111,7 +124,19 @@ function Layout({ children }: { children: React.ReactNode }) {
             <div className="px-6 py-4 space-y-3">
               {navLinks.map((link) => (
                 <NavLink key={link.to} to={link.to} className="block text-sm font-medium text-charcoal">
-                  {link.label}
+                  {link.to === '/inquiry-list' ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <ShoppingCart size={16} />
+                      {link.label}
+                      {totalItems > 0 && (
+                        <span className="bg-primary text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                          {totalItems > 99 ? '99+' : totalItems}
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    link.label
+                  )}
                 </NavLink>
               ))}
             </div>

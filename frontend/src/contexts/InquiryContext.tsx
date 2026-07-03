@@ -47,7 +47,8 @@ export function InquiryProvider({ children }: { children: ReactNode }) {
           productId: product._id,
           name: product.name,
           price: product.price,
-          quantity: 1
+          quantity: 1,
+          image: product.images?.[0]
         }
       ];
     });

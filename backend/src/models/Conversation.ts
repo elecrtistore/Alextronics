@@ -6,6 +6,8 @@ export interface IConversation {
   inquiryId?: string;
   productId?: string;
   productName?: string;
+  productImage?: string;
+  productPrice?: number;
   lastMessage?: { text: string; timestamp: Date; senderId: string };
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +22,8 @@ const conversationSchema = new Schema({
   inquiryId: { type: String },
   productId: { type: String },
   productName: { type: String },
+  productImage: { type: String },
+  productPrice: { type: Number },
   lastMessage: {
     text: { type: String },
     timestamp: { type: Date },

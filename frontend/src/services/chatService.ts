@@ -12,6 +12,8 @@ export interface Conversation {
   inquiryId?: string;
   productId?: string;
   productName?: string;
+  productImage?: string;
+  productPrice?: number;
   lastMessage?: { text: string; timestamp: string; senderId: string };
   createdAt: string;
   updatedAt: string;
@@ -51,6 +53,8 @@ export async function createConversation(data: {
   inquiryId?: string;
   productId?: string;
   productName?: string;
+  productImage?: string;
+  productPrice?: number;
 }) {
   const res = await api.post<Conversation>('/chat/conversations', data);
   return res.data;

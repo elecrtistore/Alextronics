@@ -14,7 +14,6 @@ import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
-import MyInquiriesPage from './pages/MyInquiriesPage';
 import MessagingPage from './pages/MessagingPage';
 import Layout from './components/Layout';
 
@@ -43,7 +42,6 @@ function App() {
           <Route path="/inquiry-list" element={<InquiryListPage />} />
           <Route path="/inquiry" element={<InquiryFormPage />} />
           <Route path="/success" element={<InquirySuccessPage />} />
-          <Route path="/my-inquiries" element={<RoleGuard allowed={['Buyer', 'Seller', 'Admin']}><MyInquiriesPage /></RoleGuard>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/admin" element={<RoleGuard allowed={['Admin']}><AdminDashboardPage /></RoleGuard>} />

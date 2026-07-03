@@ -236,7 +236,7 @@ function ShopPage() {
                             </>
                           )}
                           <button onClick={() => addItem(product)} className="flex-1 rounded-full bg-primary text-sm font-semibold text-white py-2 hover:bg-primary-hover transition">
-                            Add to Inquiry
+                            Add to Cart
                           </button>
                         </div>
                       </div>

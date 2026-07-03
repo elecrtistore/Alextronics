@@ -1,19 +1,47 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInquiry } from '../contexts/InquiryContext';
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { createConversation } from '../services/chatService';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, MessageCircle, LogIn } from 'lucide-react';
 
 function InquiryListPage() {
   const { items, removeItem, updateQuantity, clear, totalItems, totalAmount } = useInquiry();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [messaging, setMessaging] = useState(false);
+
+  const handleMessageSeller = async () => {
+    if (!user) { navigate('/login'); return; }
+    if (items.length === 0) return;
+    setMessaging(true);
+    try {
+      const first = items[0];
+      const conv = await createConversation({
+        participantId: 'admin',
+        participantRole: 'Admin',
+        participantName: 'ALEXTRONICS',
+        productId: first.productId,
+        productName: items.length === 1 ? first.name : `${first.name} + ${items.length - 1} more`,
+        productImage: first.image,
+        productPrice: totalAmount,
+      });
+      navigate(`/messages?conversation=${conv._id}`);
+    } catch {
+      navigate('/messages');
+    } finally {
+      setMessaging(false);
+    }
+  };
 
   return (
     <div className="pt-24 min-h-screen">
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-charcoal">Inquiry Cart</h1>
+            <h1 className="text-3xl font-bold text-charcoal">Shopping Cart</h1>
             <p className="mt-2 text-sm text-soft">
-              {totalItems > 0 ? `${totalItems} product${totalItems > 1 ? 's' : ''} saved.` : 'Add products from the store.'}
+              {totalItems > 0 ? `${totalItems} product${totalItems > 1 ? 's' : ''} in your cart.` : 'Add products from the store.'}
             </p>
           </div>
           {items.length > 0 && (
@@ -24,7 +52,7 @@ function InquiryListPage() {
         {items.length === 0 ? (
           <div className="text-center py-20 space-y-4">
             <ShoppingBag size={48} className="text-soft mx-auto" />
-            <p className="text-soft">Your inquiry cart is empty.</p>
+            <p className="text-soft">Your cart is empty.</p>
             <button onClick={() => navigate('/shop')} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition inline-flex items-center gap-2">
               Browse store <ArrowRight size={16} />
             </button>
@@ -33,9 +61,14 @@ function InquiryListPage() {
           <div className="space-y-4">
             {items.map((item) => (
               <div key={item.productId} className="rounded-2xl bg-white border border-border/60 p-5 flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-semibold text-charcoal">{item.name}</h2>
-                  <p className="text-sm text-soft mt-1">KSh {item.price.toLocaleString()} each</p>
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  {item.image && (
+                    <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-contain bg-slate-50 border border-border/60" />
+                  )}
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-charcoal truncate">{item.name}</h2>
+                    <p className="text-sm text-soft mt-1">KSh {item.price.toLocaleString()} each</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 bg-slate-50 rounded-full px-3 py-1.5">
@@ -63,9 +96,21 @@ function InquiryListPage() {
               <p className="text-sm text-soft">Estimated total</p>
               <p className="text-3xl font-bold text-charcoal">KSh {totalAmount.toLocaleString()}</p>
             </div>
-            <button onClick={() => navigate('/inquiry')} className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20">
-              Submit inquiry
-            </button>
+            <div className="flex gap-3">
+              {!user && (
+                <button onClick={() => navigate('/login')} className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-charcoal hover:bg-slate-50 transition inline-flex items-center gap-2">
+                  <LogIn size={16} /> Sign in
+                </button>
+              )}
+              <button
+                onClick={handleMessageSeller}
+                disabled={messaging}
+                className="rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20 disabled:opacity-50 inline-flex items-center gap-2"
+              >
+                <MessageCircle size={18} />
+                {messaging ? 'Opening chat...' : 'Message Seller'}
+              </button>
+            </div>
           </div>
         )}
       </div>

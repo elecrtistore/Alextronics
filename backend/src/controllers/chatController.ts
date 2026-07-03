@@ -50,7 +50,7 @@ export async function getMessages(req: Request, res: Response) {
 
 export async function createConversation(req: Request, res: Response) {
   const firebaseUser = res.locals.firebaseUser;
-  const { participantId, participantRole, participantName, inquiryId, productId, productName } = req.body;
+  const { participantId, participantRole, participantName, inquiryId, productId, productName, productImage, productPrice } = req.body;
 
   if (!participantId) return res.status(400).json({ message: 'participantId is required' });
 
@@ -69,7 +69,9 @@ export async function createConversation(req: Request, res: Response) {
     ],
     inquiryId,
     productId,
-    productName
+    productName,
+    productImage,
+    productPrice
   });
   res.status(201).json(conversation);
 }

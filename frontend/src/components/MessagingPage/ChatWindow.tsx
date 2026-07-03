@@ -47,7 +47,8 @@ export default function ChatWindow({ conversation }: { conversation: Conversatio
       <ChatHeader conversation={conversation} currentUserId={currentUserId} />
       <ProductPreview
         name={conversation.productName}
-        price={undefined}
+        price={conversation.productPrice}
+        image={conversation.productImage}
       />
       <MessageList
         messages={messages}
