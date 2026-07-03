@@ -1,13 +1,38 @@
-import { Phone, Mail, MapPin, Clock, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Phone, Mail, MapPin, Clock, Package } from 'lucide-react';
+import api from '../../services/api';
+
+interface SiteContent {
+  page: string; title: string; subtitle: string; body: string;
+  sections: { heading: string; content: string }[];
+  meta: Record<string, string>;
+}
 
 export default function BusinessPanel() {
+  const [settings, setSettings] = useState<SiteContent | null>(null);
+  const [footer, setFooter] = useState<SiteContent | null>(null);
+  const [productCount, setProductCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.get<SiteContent>('/site/settings').then((r) => { if (r.data.title) setSettings(r.data); }).catch(() => {});
+    api.get<SiteContent>('/site/footer').then((r) => { if (r.data.sections?.length) setFooter(r.data); }).catch(() => {});
+    api.get<any[]>('/products').then((r) => setProductCount(r.data.length)).catch(() => {});
+  }, []);
+
+  const storeName = settings?.title || 'ALEXTRONICS';
+  const aboutText = settings?.body || settings?.sections?.[0]?.content || 'Inquiry-first marketplace for quality electronics. Direct contact between buyers and sellers.';
+  const phone = footer?.meta?.phone || footer?.meta?.contact || '0708309429';
+  const email = footer?.meta?.email || 'alextronics.shop01@gmail.com';
+  const address = footer?.meta?.address || 'Nairobi, Kenya';
+  const hours = footer?.meta?.hours || 'Mon - Sat: 8:00 AM - 7:00 PM\nSun: 10:00 AM - 4:00 PM';
+
   return (
     <div className="w-[320px] border-l border-[#E5E7EB] bg-white flex flex-col overflow-y-auto shrink-0 max-lg:hidden">
       <div className="p-6 text-center border-b border-[#E5E7EB]">
         <div className="w-16 h-16 rounded-full bg-[#274472] flex items-center justify-center mx-auto">
-          <span className="text-2xl font-bold text-white">A</span>
+          <span className="text-2xl font-bold text-white">{storeName[0]}</span>
         </div>
-        <h3 className="mt-3 text-lg font-bold text-[#111827]">ALEXTRONICS</h3>
+        <h3 className="mt-3 text-lg font-bold text-[#111827]">{storeName}</h3>
         <div className="flex items-center justify-center gap-1.5 mt-1">
           <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
           <span className="text-xs text-[#22C55E] font-medium">Online</span>
@@ -23,39 +48,34 @@ export default function BusinessPanel() {
           <p className="text-sm text-[#111827]">Electronics Store</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Products', value: '200+' },
-            { label: 'Rating', value: '4.8' },
-            { label: 'Response', value: '<5min' },
-          ].map((s) => (
-            <div key={s.label} className="rounded-xl bg-[#F8FAFC] p-3 text-center border border-[#E5E7EB]">
-              <p className="text-lg font-bold text-[#274472]">{s.value}</p>
-              <p className="text-[10px] text-[#6B7280] mt-0.5">{s.label}</p>
-            </div>
-          ))}
-        </div>
+        {productCount !== null && (
+          <div className="rounded-xl bg-[#F8FAFC] p-4 text-center border border-[#E5E7EB]">
+            <Package size={20} className="mx-auto text-[#274472]" />
+            <p className="mt-1 text-lg font-bold text-[#274472]">{productCount}</p>
+            <p className="text-[10px] text-[#6B7280] mt-0.5">Products</p>
+          </div>
+        )}
 
         <div>
           <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2">About</p>
-          <p className="text-sm text-[#6B7280] leading-relaxed">
-            Inquiry-first marketplace for quality electronics. Direct contact between buyers and sellers.
-          </p>
+          <p className="text-sm text-[#6B7280] leading-relaxed">{aboutText}</p>
         </div>
 
         <div>
           <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-3">Contact</p>
           <div className="space-y-3">
-            {[
-              { icon: Phone, label: '+254 708 309 429' },
-              { icon: Mail, label: 'info@alextronics.com' },
-              { icon: MapPin, label: 'Nairobi, Kenya' },
-            ].map((c) => (
-              <div key={c.label} className="flex items-center gap-3">
-                <c.icon size={14} className="text-[#6B7280]" />
-                <span className="text-sm text-[#111827]">{c.label}</span>
-              </div>
-            ))}
+            <div className="flex items-center gap-3">
+              <Phone size={14} className="text-[#6B7280]" />
+              <span className="text-sm text-[#111827]">{phone}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Mail size={14} className="text-[#6B7280]" />
+              <span className="text-sm text-[#111827]">{email}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin size={14} className="text-[#6B7280]" />
+              <span className="text-sm text-[#111827]">{address}</span>
+            </div>
           </div>
         </div>
 
@@ -64,32 +84,11 @@ export default function BusinessPanel() {
           <div className="flex items-start gap-3">
             <Clock size={14} className="text-[#6B7280] mt-0.5" />
             <div>
-              <p className="text-sm text-[#111827]">Mon - Sat: 8:00 AM - 7:00 PM</p>
-              <p className="text-sm text-[#111827]">Sun: 10:00 AM - 4:00 PM</p>
+              {hours.split('\n').map((line, i) => (
+                <p key={i} className="text-sm text-[#111827]">{line}</p>
+              ))}
             </div>
           </div>
-        </div>
-
-        <div className="pt-2">
-          <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-3">Social</p>
-          <div className="flex gap-3">
-            {['FB', 'IG', 'TT', 'YT'].map((s) => (
-              <button key={s} className="w-9 h-9 rounded-full bg-[#F8FAFC] border border-[#E5E7EB] text-xs font-bold text-[#6B7280] hover:bg-[#274472] hover:text-white transition">
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-[#E5E7EB] space-y-2">
-          <button className="flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#111827] transition w-full">
-            <AlertTriangle size={14} />
-            Block Notifications
-          </button>
-          <button className="flex items-center gap-2 text-sm text-[#EF4444] hover:text-red-700 transition w-full">
-            <AlertTriangle size={14} />
-            Report Conversation
-          </button>
         </div>
       </div>
     </div>

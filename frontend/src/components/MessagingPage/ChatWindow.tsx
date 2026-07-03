@@ -49,6 +49,7 @@ export default function ChatWindow({ conversation }: { conversation: Conversatio
         name={conversation.productName}
         price={conversation.productPrice}
         image={conversation.productImage}
+        productId={conversation.productId}
       />
       <MessageList
         messages={messages}
