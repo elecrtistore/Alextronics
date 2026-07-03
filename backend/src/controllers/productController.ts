@@ -137,9 +137,9 @@ function parsePrice(value?: string) {
 }
 
 function parseStock(value?: string) {
-  if (!value) return 0;
+  if (!value) return 1;
   const numeric = Number(cleanString(value));
-  return Number.isFinite(numeric) && numeric >= 0 ? Math.floor(numeric) : 0;
+  return Number.isFinite(numeric) && numeric >= 0 ? Math.floor(numeric) : 1;
 }
 
 function parseImages(value?: string) {
@@ -276,6 +276,10 @@ export async function importProducts(req: Request, res: Response) {
     if (payload.price < 0) {
       errors.push({ row: rowNumber, field: 'price', message: 'Price must be zero or greater.' });
       continue;
+    }
+
+    if (payload.stock < 1) {
+      payload.stock = 1;
     }
 
     if (payload.images.length === 0) {
