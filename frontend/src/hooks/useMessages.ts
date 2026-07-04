@@ -23,7 +23,25 @@ export function useMessages(conversationId: string | null) {
     setMessages([]);
     joinedRef.current = false;
     if (!conversationId) return;
+
     load();
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        load();
+      }
+    }, 3000);
+
+    const handleFocus = () => {
+      load();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [conversationId, load]);
 
   useEffect(() => {

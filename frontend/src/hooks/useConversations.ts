@@ -29,7 +29,25 @@ export function useConversations() {
       setLoading(false);
       return;
     }
+
     load();
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        load();
+      }
+    }, 5000);
+
+    const handleFocus = () => {
+      load();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [load, firebaseUser, authLoading]);
 
   useEffect(() => {
