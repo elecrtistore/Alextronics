@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
-import { Menu, X, ShoppingCart, Package, MessageCircle } from 'lucide-react';
+import { ShoppingCart, Package, MessageCircle, Phone } from 'lucide-react';
 import api from '../services/api';
 import CookieConsent from './CookieConsent';
 
@@ -16,7 +16,6 @@ function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const { totalItems } = useInquiry();
   const location = useLocation();
-  const [open, setOpen] = useState(false);
   const logoSrc = `${import.meta.env.BASE_URL}logo.png`;
   const [scrolled, setScrolled] = useState(false);
   const [shopName, setShopName] = useState('ALEXTRONICS');
@@ -37,7 +36,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     }).catch(() => {});
   }, []);
 
-  useEffect(() => { setOpen(false); }, [location]);
+  useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
   const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
@@ -52,9 +51,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   const mobileNav = [
+    { to: '/', label: 'Home', icon: Package },
     { to: '/shop', label: 'Shop', icon: Package },
     { to: '/inquiry-list', label: 'Cart', icon: ShoppingCart },
     { to: '/messages', label: 'Chat', icon: MessageCircle },
+    { to: '/contacts', label: 'Help', icon: Phone },
   ];
 
   return (
@@ -64,13 +65,14 @@ function Layout({ children }: { children: React.ReactNode }) {
       }`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
           <Link to="/" className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-[#1E3A5F] flex items-center justify-center text-white text-sm font-bold shadow-sm">
-              {shopName.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-charcoal leading-none">{shopName}</p>
-              <p className="text-[11px] text-soft uppercase tracking-[0.18em]">Mobile-first electronics marketplace</p>
-            </div>
+            {!logoError ? (
+              <img src={logoSrc} alt={shopName} className="h-10 w-10 rounded-2xl object-cover shadow-sm" onError={() => setLogoError(true)} />
+            ) : (
+              <div className="h-10 w-10 rounded-2xl bg-[#1E3A5F] flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                {shopName.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <span className="text-sm font-semibold text-charcoal leading-none">{shopName}</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -121,73 +123,39 @@ function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="md:hidden">
-            <button onClick={() => setOpen(!open)} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-charcoal shadow-sm transition hover:bg-slate-50">
-              {open ? <X size={20} /> : <Menu size={20} />}
-            </button>
+            {user ? (
+              <span className="rounded-full border border-border bg-slate-50 px-3 py-2 text-xs font-semibold text-charcoal truncate max-w-[120px]">{user.displayName || user.email}</span>
+            ) : (
+              <Link to="/login" className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition">
+                Sign in
+              </Link>
+            )}
           </div>
         </div>
-
-        {open && (
-          <div className="md:hidden border-t border-border bg-white">
-            <div className="px-6 py-4 space-y-3">
-              {navLinks.map((link) => (
-                <NavLink key={link.to} to={link.to} className="block text-sm font-medium text-charcoal">
-                  {link.to === '/inquiry-list' ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <ShoppingCart size={16} />
-                      {link.label}
-                      {totalItems > 0 && (
-                        <span className="bg-primary text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                          {totalItems > 99 ? '99+' : totalItems}
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    link.label
-                  )}
-                </NavLink>
-              ))}
-            </div>
-            <div className="border-t border-border px-6 py-4">
-              {user ? (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-charcoal">{user.displayName || user.email}</p>
-                  <button onClick={logout} className="w-full rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <Link to="/login" className="w-full inline-flex justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition">
-                  Sign in
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
       </header>
 
       <main className="flex-1 pb-24">{children}</main>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-around px-6 py-2">
-          {mobileNav.map((link) => {
-            const Icon = link.icon;
-            const active = location.pathname.startsWith(link.to);
-            return (
-              <Link key={link.to} to={link.to} className={`inline-flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}>
-                <Icon size={18} />
-                {link.label}
-              </Link>
-            );
-          })}
-          <button onClick={() => setOpen(!open)} className="inline-flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold text-soft hover:text-charcoal transition">
-            {open ? <X size={18} /> : <Menu size={18} />}
-            Menu
-          </button>
-        </div>
-      </div>
+          <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
+              {mobileNav.map((link) => {
+                const Icon = link.icon;
+                const active = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
+                  >
+                    <Icon size={20} />
+                    <span className="sr-only">{link.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
 
-      <footer className="bg-white border-t border-border">
+      <footer className="hidden md:block bg-white border-t border-border">
         <div className="mx-auto max-w-7xl px-6 py-16">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div>

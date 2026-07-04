@@ -110,7 +110,7 @@ function ShopPage() {
                 <h4 className="text-sm font-semibold text-charcoal mb-3">Category</h4>
                 <div className="space-y-1">
                   {categories.map((cat) => (
-                    <button key={cat} onClick={() => setCategory(cat)} className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition ${category === cat ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal'}`}>
+                    <button key={cat} onClick={() => { setCategory(cat); setFiltersOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition ${category === cat ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal'}`}>
                       {cat}
                     </button>
                   ))}

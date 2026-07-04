@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useConversations } from '../hooks/useConversations';
-import { useSocket } from '../hooks/useSocket';
+import { fetchConversation, Conversation } from '../services/chatService';
 import ConversationSidebar from '../components/MessagingPage/ConversationSidebar';
 import ChatWindow from '../components/MessagingPage/ChatWindow';
 import BusinessPanel from '../components/MessagingPage/BusinessPanel';
@@ -12,19 +12,40 @@ export default function MessagingPage() {
   const { user } = useAuth();
   const { conversations, loading } = useConversations();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const selected = conversations.find(c => c._id === selectedId) || null;
+  const selected = conversations.find(c => c._id === selectedId) || selectedConversation || null;
 
   useEffect(() => {
     if (loading) return;
-    if (selectedId && conversations.some((c) => c._id === selectedId)) return;
+
     const requestedConversation = searchParams.get('conversation');
-    if (requestedConversation && conversations.some((c) => c._id === requestedConversation)) {
-      setSelectedId(requestedConversation);
+    if (requestedConversation) {
+      const existing = conversations.find((c) => c._id === requestedConversation);
+      if (existing) {
+        setSelectedId(requestedConversation);
+        setSelectedConversation(null);
+        return;
+      }
+
+      if (selectedId !== requestedConversation) {
+        setSelectedId(requestedConversation);
+      }
+
+      fetchConversation(requestedConversation)
+        .then((conversation) => {
+          setSelectedConversation(conversation);
+        })
+        .catch(() => {
+          setSelectedConversation(null);
+        });
       return;
     }
+
+    if (selectedId && conversations.some((c) => c._id === selectedId)) return;
     if (conversations.length > 0) {
       setSelectedId(conversations[0]._id);
+      setSelectedConversation(null);
     }
   }, [conversations, loading, searchParams, selectedId]);
 
