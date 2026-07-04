@@ -22,37 +22,6 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [logoError, setLogoError] = useState(false);
   const [footerSections, setFooterSections] = useState<{ heading: string; content: string }[]>([]);
   const [footerMeta, setFooterMeta] = useState<Record<string, string>>({});
-  const mainRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const node = mainRef.current;
-    if (!node) return;
-
-    const onScroll = () => setScrolled(node.scrollTop > 40);
-    node.addEventListener('scroll', onScroll, { passive: true });
-    return () => node.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const updateViewport = () => {
-      const height = window.visualViewport?.height ?? window.innerHeight;
-      document.documentElement.style.setProperty('--vvh', `${height}px`);
-    };
-
-    updateViewport();
-
-    window.addEventListener('resize', updateViewport);
-    window.addEventListener('orientationchange', updateViewport);
-    window.visualViewport?.addEventListener('resize', updateViewport);
-    window.visualViewport?.addEventListener('scroll', updateViewport);
-
-    return () => {
-      window.removeEventListener('resize', updateViewport);
-      window.removeEventListener('orientationchange', updateViewport);
-      window.visualViewport?.removeEventListener('resize', updateViewport);
-      window.visualViewport?.removeEventListener('scroll', updateViewport);
-    };
-  }, []);
 
   useEffect(() => {
     api.get<SiteContent>('/site/settings').then((r) => { if (r.data.title) setShopName(r.data.title); }).catch(() => {});
@@ -62,7 +31,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     }).catch(() => {});
   }, []);
 
-  useEffect(() => { if (mainRef.current) { mainRef.current.scrollTop = 0; } }, [location]);
+  useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
   const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
@@ -109,7 +78,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   })();
 
   return (
-    <div className="flex flex-col overflow-hidden" style={{ height: 'var(--vvh, 100dvh)' }}>
+    <div className="min-h-screen flex flex-col">
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'
       }`}>
@@ -189,10 +158,10 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto pt-[90px] pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-24">{children}</main>
+      <main className="flex-1 pt-[90px] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-24">{children}</main>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]" style={{ transform: 'translateZ(0)', willChange: 'transform', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
+      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-10px_20px_rgba(15,23,42,0.08)]" style={{ transform: 'translateZ(0)', willChange: 'transform', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2">
           {mobileNav.map((link) => {
             const Icon = link.icon;
             const active = location.pathname.startsWith(link.to);
