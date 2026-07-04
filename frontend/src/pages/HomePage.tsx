@@ -48,48 +48,48 @@ function HomePage() {
   };
 
   return (
-    <div>
-      {/* ─── HERO ─── */}
-      <section className="relative min-h-[70vh] lg:min-h-[90vh] flex items-center bg-[#F5F5F0] overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 25% 25%, #1E3A5F 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-16 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 border border-primary/20 bg-primary-light px-4 py-1.5 text-sm font-medium text-primary tracking-wide">
+    <div className="pt-24">
+      <section className="border-b border-border bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-16">
+          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] items-center">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-light px-4 py-2 text-sm font-medium text-primary tracking-wide">
                 <Package size={14} /> Private electronics marketplace
               </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-charcoal leading-[1.05]">
-                {hero.title || 'Premium Electronics'}
-              </h1>
-              <p className="text-lg text-soft leading-relaxed max-w-lg">
-                {hero.subtitle || 'Browse curated electronics and request a quote directly from the seller. No middlemen, just great deals.'}
-              </p>
-              <div className="flex gap-3">
-                <Link to="/shop" className="inline-flex items-center gap-2 bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition border border-primary">
+              <div>
+                <h1 className="text-4xl sm:text-5xl font-bold text-charcoal tracking-tight leading-tight">
+                  {hero.title || 'Premium Electronics'}
+                </h1>
+                <p className="mt-4 max-w-2xl text-lg text-soft leading-relaxed">
+                  {hero.subtitle || 'Browse curated electronics and request a quote directly from the seller. No middlemen, just great deals.'}
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition border border-primary">
                   Start shopping <ArrowRight size={16} />
                 </Link>
-                <Link to="/about" className="inline-flex items-center gap-2 border border-border bg-white px-6 py-3 text-sm font-semibold text-charcoal hover:bg-[#F5F5F0] transition">
+                <Link to="/about" className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-white px-6 py-3 text-sm font-semibold text-charcoal hover:bg-[#F5F5F0] transition">
                   Learn more
                 </Link>
               </div>
-              <div className="flex gap-6 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 text-center">
                 {[
                   { icon: Bolt, label: 'Best Prices' },
                   { icon: Shield, label: 'Trusted Sellers' },
                   { icon: MessageCircle, label: 'Direct Contact' }
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 text-sm text-soft">
-                    <item.icon size={16} className="text-primary" />
-                    {item.label}
+                  <div key={item.label} className="flex flex-col items-center gap-2 rounded-3xl border border-border/80 bg-slate-50 px-4 py-5 text-sm text-soft">
+                    <item.icon size={18} className="text-primary" />
+                    <span className="font-semibold text-charcoal">{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="relative hidden lg:block">
-              <div className="relative grid grid-cols-3 gap-4">
+            <div className="hidden lg:block">
+              <div className="grid grid-cols-3 gap-4">
                 {(products.length > 0 ? products.slice(0, 6) : []).map((product) => (
-                  <Link key={product._id} to={`/products/${product._id}`} className="aspect-square border border-border bg-white overflow-hidden hover:scale-105 transition-transform">
-                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2" />
+                  <Link key={product._id} to={`/products/${product._id}`} className="aspect-square overflow-hidden rounded-3xl border border-border bg-slate-50 shadow-sm hover:shadow-md transition-shadow">
+                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain p-4" />
                   </Link>
                 ))}
               </div>
