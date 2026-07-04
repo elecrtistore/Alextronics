@@ -10,16 +10,24 @@ export function useConversations() {
   const socket = useSocket();
   const { firebaseUser, loading: authLoading } = useAuth();
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     try {
       const [data, count] = await Promise.all([
         fetchConversations(),
         fetchUnreadCount()
       ]);
-      setConversations(data);
+      setConversations((prev) => {
+        const prevIds = new Set(prev.map((conv) => conv._id));
+        const nextIds = new Set(data.map((conv) => conv._id));
+        const hasChanges = data.some((conv) => !prevIds.has(conv._id)) || prev.some((conv) => !nextIds.has(conv._id));
+        if (!hasChanges && prev.length === data.length) {
+          return prev;
+        }
+        return data;
+      });
       setUnread(count);
     } catch {} finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -30,16 +38,16 @@ export function useConversations() {
       return;
     }
 
-    load();
+    load(true);
 
     const intervalId = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
-        load();
+        load(true);
       }
-    }, 5000);
+    }, 10000);
 
     const handleFocus = () => {
-      load();
+      load(true);
     };
 
     window.addEventListener('focus', handleFocus);

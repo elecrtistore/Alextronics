@@ -20,8 +20,13 @@ export default function MessageList({
   const didMarkRef = useRef(false);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (messages.length === 0) return;
+    const lastMessage = messages[messages.length - 1];
+    const shouldAutoScroll = lastMessage?.senderId === user?.uid || messages.length > 0;
+    if (shouldAutoScroll) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, user?.uid]);
 
   useEffect(() => {
     if (messages.length > 0 && !didMarkRef.current) {

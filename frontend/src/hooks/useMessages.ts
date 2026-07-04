@@ -8,14 +8,25 @@ export function useMessages(conversationId: string | null) {
   const socket = useSocket();
   const joinedRef = useRef(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     if (!conversationId) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const data = await fetchMessages(conversationId);
-      setMessages(data);
+      setMessages((prev) => {
+        const prevIds = new Set(prev.map((msg) => msg._id));
+        const nextIds = new Set(data.map((msg) => msg._id));
+        const hasNewMessages = data.some((msg) => !prevIds.has(msg._id));
+        const hasRemovedMessages = prev.some((msg) => !nextIds.has(msg._id));
+
+        if (!hasNewMessages && !hasRemovedMessages && prev.length === data.length) {
+          return prev;
+        }
+
+        return data;
+      });
     } catch {} finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [conversationId]);
 
@@ -24,16 +35,16 @@ export function useMessages(conversationId: string | null) {
     joinedRef.current = false;
     if (!conversationId) return;
 
-    load();
+    load(true);
 
     const intervalId = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
-        load();
+        load(true);
       }
-    }, 3000);
+    }, 8000);
 
     const handleFocus = () => {
-      load();
+      load(true);
     };
 
     window.addEventListener('focus', handleFocus);
