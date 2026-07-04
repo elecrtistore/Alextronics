@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
@@ -22,11 +22,36 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [logoError, setLogoError] = useState(false);
   const [footerSections, setFooterSections] = useState<{ heading: string; content: string }[]>([]);
   const [footerMeta, setFooterMeta] = useState<Record<string, string>>({});
-  const [showMobileNav] = useState(true);
+  const mainRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    const node = mainRef.current;
+    if (!node) return;
+
+    const onScroll = () => setScrolled(node.scrollTop > 40);
+    node.addEventListener('scroll', onScroll, { passive: true });
+    return () => node.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty('--vvh', `${height}px`);
+    };
+
+    updateViewport();
+
+    window.addEventListener('resize', updateViewport);
+    window.addEventListener('orientationchange', updateViewport);
+    window.visualViewport?.addEventListener('resize', updateViewport);
+    window.visualViewport?.addEventListener('scroll', updateViewport);
+
+    return () => {
+      window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('orientationchange', updateViewport);
+      window.visualViewport?.removeEventListener('resize', updateViewport);
+      window.visualViewport?.removeEventListener('scroll', updateViewport);
+    };
   }, []);
 
   useEffect(() => {
@@ -37,9 +62,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     }).catch(() => {});
   }, []);
 
-  useEffect(() => { window.scrollTo(0, 0); }, [location]);
-
-  // mobile nav remains fixed and visible at all times to avoid layout jumps
+  useEffect(() => { if (mainRef.current) { mainRef.current.scrollTop = 0; } }, [location]);
 
   const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
@@ -86,7 +109,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   })();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col overflow-hidden" style={{ height: 'var(--vvh, 100dvh)' }}>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'
       }`}>
@@ -166,36 +189,35 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-40 md:pb-24">{children}</main>
+      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto pt-[90px] pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-24">{children}</main>
 
-              <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
-                  {mobileNav.map((link) => {
-                    const Icon = link.icon;
-                    const active = location.pathname.startsWith(link.to);
-                    return (
-                      <button
-                        key={link.to}
-                        onClick={() => {
-                          if (location.pathname === link.to) {
-                            // force full reload to avoid blank-page cases on mobile
-                            window.location.href = link.to;
-                          } else {
-                            navigate(link.to);
-                          }
-                        }}
-                        className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
-                        aria-label={link.label}
-                      >
-                        <Icon size={20} />
-                        <span className="sr-only">{link.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]" style={{ transform: 'translateZ(0)', willChange: 'transform', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
+          {mobileNav.map((link) => {
+            const Icon = link.icon;
+            const active = location.pathname.startsWith(link.to);
+            return (
+              <button
+                key={link.to}
+                onClick={() => {
+                  if (location.pathname === link.to) {
+                    window.location.href = link.to;
+                  } else {
+                    navigate(link.to);
+                  }
+                }}
+                className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
+                aria-label={link.label}
+              >
+                <Icon size={20} />
+                <span className="sr-only">{link.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      <footer id="site-footer" className="block bg-white border-t border-border" ref={(el) => { if (el) (window as any).__footerRef = el; }}>
+      <footer id="site-footer" className="block bg-white border-t border-border">
         <div className="mx-auto max-w-7xl px-6 pt-16 pb-28 md:py-16">
           <div className={`grid gap-10 sm:grid-cols-2 lg:grid-cols-${Math.min(5, footerColumns.length)}`}>
             {footerColumns.map((col, i) => (
