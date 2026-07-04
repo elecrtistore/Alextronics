@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
-import { Menu, X, ShoppingCart, Home, MessageCircle, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, House, MessageCircle } from 'lucide-react';
 import api from '../services/api';
 import CookieConsent from './CookieConsent';
 
@@ -52,7 +52,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   const mobileNav = [
-    { to: '/shop', label: 'Shop', icon: Home },
+    { to: '/shop', label: 'Shop', icon: House },
     { to: '/inquiry-list', label: 'Cart', icon: ShoppingCart },
     { to: '/messages', label: 'Chat', icon: MessageCircle },
   ];
