@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
 import { ShoppingCart, Package, MessageCircle, Phone } from 'lucide-react';
@@ -22,6 +22,8 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [logoError, setLogoError] = useState(false);
   const [footerSections, setFooterSections] = useState<{ heading: string; content: string }[]>([]);
   const [footerMeta, setFooterMeta] = useState<Record<string, string>>({});
+  const footerRef = (window as any).__footerRef || null;
+  const [showMobileNav, setShowMobileNav] = useState(true);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
@@ -38,6 +40,19 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
+  // hide mobile nav when footer is visible to avoid it covering footer content
+  useEffect(() => {
+    const node = document.getElementById('site-footer');
+    if (!node) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        setShowMobileNav(!entry.isIntersecting);
+      });
+    }, { root: null, threshold: 0.05 });
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
+
   const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
 
@@ -50,6 +65,8 @@ function Layout({ children }: { children: React.ReactNode }) {
     ...(user?.role === 'Admin' ? [{ to: '/admin', label: 'Admin' }] : []),
   ];
 
+  const navigate = useNavigate();
+
   const mobileNav = [
     { to: '/', label: 'Home', icon: Package },
     { to: '/shop', label: 'Shop', icon: Package },
@@ -57,6 +74,29 @@ function Layout({ children }: { children: React.ReactNode }) {
     { to: '/messages', label: 'Chat', icon: MessageCircle },
     { to: '/contacts', label: 'Help', icon: Phone },
   ];
+
+  const footerColumns = (() => {
+    const cols: { heading: string; items?: { label: string; to?: string }[]; content?: string }[] = [];
+
+    cols.push({ heading: shopName, content: footerSections[0]?.content || 'Inquiry-first marketplace for quality electronics. Direct contact between buyers and sellers.' });
+
+    cols.push({ heading: 'Explore', items: [
+      { label: 'Shop', to: '/shop' },
+      { label: 'Cart', to: '/inquiry-list' },
+      { label: 'Messages', to: '/messages' },
+      { label: 'About', to: '/about' },
+    ] });
+
+    cols.push({ heading: 'Contact', content: footerMeta.contact || 'support@alextronics.example' });
+
+    cols.push({ heading: 'Support', items: [ { label: 'Privacy Policy', to: '/privacy' }, { label: 'Terms of Service', to: '/terms' } ] });
+
+    if (user?.role === 'Admin') {
+      cols.splice(2, 0, { heading: 'Admin', items: [ { label: 'Admin Panel', to: '/admin' }, { label: 'Site Settings', to: '/admin/site' } ] });
+    }
+
+    return cols;
+  })();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -122,9 +162,14 @@ function Layout({ children }: { children: React.ReactNode }) {
             )}
           </div>
 
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
             {user ? (
-              <span className="rounded-full border border-border bg-slate-50 px-3 py-2 text-xs font-semibold text-charcoal truncate max-w-[120px]">{user.displayName || user.email}</span>
+              <>
+                <span className="rounded-full border border-border bg-slate-50 px-3 py-2 text-xs font-semibold text-charcoal truncate max-w-[120px]">{user.displayName || user.email}</span>
+                <button onClick={logout} className="rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition">
+                  Logout
+                </button>
+              </>
             ) : (
               <Link to="/login" className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-hover transition">
                 Sign in
@@ -134,46 +179,55 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-24">{children}</main>
+      <main className="flex-1 pb-40 md:pb-24">{children}</main>
 
-          <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
-              {mobileNav.map((link) => {
-                const Icon = link.icon;
-                const active = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
-                return (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
-                  >
-                    <Icon size={20} />
-                    <span className="sr-only">{link.label}</span>
-                  </Link>
-                );
-              })}
+          {showMobileNav && (
+            <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
+              <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
+                {mobileNav.map((link) => {
+                  const Icon = link.icon;
+                  const active = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
+                  return (
+                    <button
+                      key={link.to}
+                      onClick={() => {
+                        if (location.pathname === link.to) {
+                          // force full reload to avoid blank-page cases on mobile
+                          window.location.href = link.to;
+                        } else {
+                          navigate(link.to);
+                        }
+                      }}
+                      className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
+                      aria-label={link.label}
+                    >
+                      <Icon size={20} />
+                      <span className="sr-only">{link.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
-      <footer className="hidden md:block bg-white border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <h3 className="text-lg font-bold text-charcoal">{shopName}</h3>
-              <p className="mt-3 text-sm text-soft leading-relaxed">Inquiry-first marketplace for quality electronics. Direct contact between buyers and sellers.</p>
-            </div>
-            {footerSections.map((section, i) => (
+      <footer id="site-footer" className="block bg-white border-t border-border" ref={(el) => { if (el) (window as any).__footerRef = el; }}>
+        <div className="mx-auto max-w-7xl px-6 pt-16 pb-28 md:py-16">
+          <div className={`grid gap-10 sm:grid-cols-2 lg:grid-cols-${Math.min(5, footerColumns.length)}`}>
+            {footerColumns.map((col, i) => (
               <div key={i}>
-                <h4 className="text-sm font-semibold text-charcoal uppercase tracking-wider">{section.heading}</h4>
-                <p className="mt-3 text-sm text-soft leading-relaxed">{section.content}</p>
+                <h4 className="text-sm font-semibold text-charcoal uppercase tracking-wider">{col.heading}</h4>
+                {col.content && <p className="mt-3 text-sm text-soft leading-relaxed">{col.content}</p>}
+                {col.items && (
+                  <ul className="mt-3 space-y-2 text-sm text-soft">
+                    {col.items.map((it, idx) => (
+                      <li key={idx}>
+                        {it.to ? <Link to={it.to} className="hover:text-primary transition">{it.label}</Link> : it.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             ))}
-            {footerMeta.contact && (
-              <div>
-                <h4 className="text-sm font-semibold text-charcoal uppercase tracking-wider">Contact</h4>
-                <p className="mt-3 text-sm text-soft">{footerMeta.contact}</p>
-              </div>
-            )}
           </div>
           <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-soft">
             <p>&copy; 2026 {shopName}. All rights reserved.</p>
