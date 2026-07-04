@@ -1,33 +1,37 @@
-import { Phone, MoreHorizontal } from 'lucide-react';
+import { Menu, Phone, MoreHorizontal } from 'lucide-react';
 import { Conversation } from '../../services/chatService';
 
 export default function ChatHeader({
   conversation,
-  currentUserId
+  currentUserId,
+  onOpenSidebar
 }: {
   conversation: Conversation;
   currentUserId: string;
+  onOpenSidebar: () => void;
 }) {
   const other = conversation.participants.find(p => p.userId !== currentUserId) || conversation.participants[0];
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-[#E5E7EB]">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-[#274472] flex items-center justify-center text-sm font-bold text-white">
+    <div className="flex items-center justify-between gap-3 px-4 py-3 bg-white border-b border-[#E5E7EB] shadow-sm md:px-5">
+      <div className="flex items-center gap-3 min-w-0">
+        <button onClick={onOpenSidebar} className="inline-flex items-center justify-center rounded-full border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 md:hidden">
+          <Menu size={16} />
+        </button>
+        <div className="w-11 h-11 rounded-2xl bg-[#274472] flex items-center justify-center text-sm font-semibold text-white shadow-sm">
           {(other?.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
         </div>
-        <div>
-          <p className="text-sm font-semibold text-[#111827]">{other?.name || 'Customer'}</p>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-            <span className="text-xs text-[#6B7280]">Online</span>
-          </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-900">{other?.name || 'Customer'}</p>
+          <p className="truncate text-xs text-slate-500">
+            {conversation.productName ? `Chat about ${conversation.productName}` : 'Customer support chat'}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button className="rounded-full p-2 text-[#6B7280] hover:bg-[#F8FAFC] transition">
+        <button className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-600 hover:bg-slate-100 transition">
           <Phone size={16} />
         </button>
-        <button className="rounded-full p-2 text-[#6B7280] hover:bg-[#F8FAFC] transition">
+        <button className="rounded-full border border-slate-200 bg-slate-50 p-2 text-slate-600 hover:bg-slate-100 transition">
           <MoreHorizontal size={16} />
         </button>
       </div>

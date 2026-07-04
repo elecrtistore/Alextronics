@@ -34,7 +34,7 @@ function ProductDetailsPage() {
   const imageUrl = product.images[selectedImage] ?? product.images[0] ?? '';
 
   return (
-    <div className="pt-20 min-h-screen bg-white">
+    <div className="pt-20 min-h-screen bg-white pb-28">
       <div className="mx-auto max-w-7xl px-6 py-8">
         <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
           <ChevronLeft size={16} /> Back
@@ -150,6 +150,17 @@ function ProductDetailsPage() {
             </div>
           </section>
         )}
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 sm:hidden border-t border-border/80 bg-white/95 p-4 shadow-[0_-10px_30px_rgba(15,23,42,0.08)]">
+        <div className="flex gap-3">
+          <button onClick={() => { addItem(product); navigate('/inquiry-list'); }} className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition flex items-center justify-center gap-2">
+            <ShoppingCart size={16} /> Add to Cart
+          </button>
+          <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="rounded-full border border-border bg-white px-4 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
+            <MessageCircle size={16} /> Chat
+          </a>
+        </div>
       </div>
     </div>
   );

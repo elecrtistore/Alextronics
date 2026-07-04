@@ -36,7 +36,7 @@ function InquiryListPage() {
 
   return (
     <div className="pt-24 min-h-screen">
-      <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mx-auto max-w-4xl px-6 py-12 pb-28">
         <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-3xl font-bold text-charcoal">Shopping Cart</h1>
@@ -60,8 +60,8 @@ function InquiryListPage() {
         ) : (
           <div className="space-y-4">
             {items.map((item) => (
-              <div key={item.productId} className="rounded-2xl bg-white border border-border/60 p-5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div key={item.productId} className="rounded-2xl bg-white border border-border/60 p-5 flex flex-col gap-4 sm:flex-row sm:items-center justify-between">
+                <div className="flex items-start gap-4 flex-1 min-w-0">
                   {item.image && (
                     <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-contain bg-slate-50 border border-border/60" />
                   )}
@@ -70,7 +70,7 @@ function InquiryListPage() {
                     <p className="text-sm text-soft mt-1">KSh {item.price.toLocaleString()} each</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:items-end gap-3 w-full sm:w-auto">
                   <div className="flex items-center gap-2 bg-slate-50 rounded-full px-3 py-1.5">
                     <button onClick={() => updateQuantity(item.productId, item.quantity - 1)} className="p-1 rounded-full hover:bg-slate-200 transition">
                       <Minus size={14} />
@@ -80,8 +80,8 @@ function InquiryListPage() {
                       <Plus size={14} />
                     </button>
                   </div>
-                  <p className="font-semibold text-charcoal min-w-[100px] text-right">KSh {(item.price * item.quantity).toLocaleString()}</p>
-                  <button onClick={() => removeItem(item.productId)} className="p-2 rounded-full hover:bg-red-50 transition text-soft hover:text-red-500">
+                  <p className="font-semibold text-charcoal text-right">KSh {(item.price * item.quantity).toLocaleString()}</p>
+                  <button onClick={() => removeItem(item.productId)} className="p-2 inline-flex rounded-full hover:bg-red-50 transition text-soft hover:text-red-500 self-start sm:self-end">
                     <Trash2 size={16} />
                   </button>
                 </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
-import { Menu, X, ShoppingCart } from 'lucide-react';
+import { Menu, X, ShoppingCart, Home, MessageCircle, User } from 'lucide-react';
 import api from '../services/api';
 import CookieConsent from './CookieConsent';
 
@@ -51,18 +51,26 @@ function Layout({ children }: { children: React.ReactNode }) {
     ...(user?.role === 'Admin' ? [{ to: '/admin', label: 'Admin' }] : []),
   ];
 
+  const mobileNav = [
+    { to: '/shop', label: 'Shop', icon: Home },
+    { to: '/inquiry-list', label: 'Cart', icon: ShoppingCart },
+    { to: '/messages', label: 'Chat', icon: MessageCircle },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'
       }`}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            {logoError ? (
-              <span className="text-lg font-bold text-primary">{shopName}</span>
-            ) : (
-              <img src={logoSrc} alt={shopName} className="h-8 w-auto" onError={() => setLogoError(true)} />
-            )}
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-[#1E3A5F] flex items-center justify-center text-white text-sm font-bold shadow-sm">
+              {shopName.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-sm font-semibold text-charcoal leading-none">{shopName}</p>
+              <p className="text-[11px] text-soft uppercase tracking-[0.18em]">Mobile-first electronics marketplace</p>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -113,7 +121,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="md:hidden">
-            <button onClick={() => setOpen(!open)} className="p-2 rounded-full text-charcoal transition">
+            <button onClick={() => setOpen(!open)} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-charcoal shadow-sm transition hover:bg-slate-50">
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -158,7 +166,26 @@ function Layout({ children }: { children: React.ReactNode }) {
         )}
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-24">{children}</main>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
+        <div className="mx-auto flex max-w-7xl items-center justify-around px-6 py-2">
+          {mobileNav.map((link) => {
+            const Icon = link.icon;
+            const active = location.pathname.startsWith(link.to);
+            return (
+              <Link key={link.to} to={link.to} className={`inline-flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}>
+                <Icon size={18} />
+                {link.label}
+              </Link>
+            );
+          })}
+          <button onClick={() => setOpen(!open)} className="inline-flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold text-soft hover:text-charcoal transition">
+            {open ? <X size={18} /> : <Menu size={18} />}
+            Menu
+          </button>
+        </div>
+      </div>
 
       <footer className="bg-white border-t border-border">
         <div className="mx-auto max-w-7xl px-6 py-16">
