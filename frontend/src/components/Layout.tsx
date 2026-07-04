@@ -22,8 +22,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [logoError, setLogoError] = useState(false);
   const [footerSections, setFooterSections] = useState<{ heading: string; content: string }[]>([]);
   const [footerMeta, setFooterMeta] = useState<Record<string, string>>({});
-  const footerRef = (window as any).__footerRef || null;
-  const [showMobileNav, setShowMobileNav] = useState(true);
+  const [showMobileNav] = useState(true);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
@@ -40,18 +39,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
-  // hide mobile nav when footer is visible to avoid it covering footer content
-  useEffect(() => {
-    const node = document.getElementById('site-footer');
-    if (!node) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        setShowMobileNav(!entry.isIntersecting);
-      });
-    }, { root: null, threshold: 0.05 });
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, []);
+  // mobile nav remains fixed and visible at all times to avoid layout jumps
 
   const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
@@ -68,7 +56,6 @@ function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   const mobileNav = [
-    { to: '/', label: 'Home', icon: Package },
     { to: '/shop', label: 'Shop', icon: Package },
     { to: '/inquiry-list', label: 'Cart', icon: ShoppingCart },
     { to: '/messages', label: 'Chat', icon: MessageCircle },
@@ -181,34 +168,32 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 pb-40 md:pb-24">{children}</main>
 
-          {showMobileNav && (
-            <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
-              <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
-                {mobileNav.map((link) => {
-                  const Icon = link.icon;
-                  const active = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
-                  return (
-                    <button
-                      key={link.to}
-                      onClick={() => {
-                        if (location.pathname === link.to) {
-                          // force full reload to avoid blank-page cases on mobile
-                          window.location.href = link.to;
-                        } else {
-                          navigate(link.to);
-                        }
-                      }}
-                      className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
-                      aria-label={link.label}
-                    >
-                      <Icon size={20} />
-                      <span className="sr-only">{link.label}</span>
-                    </button>
-                  );
-                })}
+              <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-12px_24px_rgba(15,23,42,0.08)]">
+                <div className="mx-auto flex max-w-7xl items-center justify-between px-2 py-1">
+                  {mobileNav.map((link) => {
+                    const Icon = link.icon;
+                    const active = location.pathname.startsWith(link.to);
+                    return (
+                      <button
+                        key={link.to}
+                        onClick={() => {
+                          if (location.pathname === link.to) {
+                            // force full reload to avoid blank-page cases on mobile
+                            window.location.href = link.to;
+                          } else {
+                            navigate(link.to);
+                          }
+                        }}
+                        className={`inline-flex flex-col items-center gap-0 rounded-2xl px-2 py-1 text-[11px] font-semibold transition ${active ? 'text-primary' : 'text-soft hover:text-charcoal'}`}
+                        aria-label={link.label}
+                      >
+                        <Icon size={20} />
+                        <span className="sr-only">{link.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
 
       <footer id="site-footer" className="block bg-white border-t border-border" ref={(el) => { if (el) (window as any).__footerRef = el; }}>
         <div className="mx-auto max-w-7xl px-6 pt-16 pb-28 md:py-16">
