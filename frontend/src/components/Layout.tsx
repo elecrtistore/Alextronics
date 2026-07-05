@@ -25,9 +25,25 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     api.get<SiteContent>('/site/settings').then((r) => { if (r.data.title) setShopName(r.data.title); }).catch(() => {});
-    api.get<SiteContent>('/site/footer').then((r) => {
+    api.get<SiteContent>('/site/footer').then(async (r) => {
       if (r.data.sections) setFooterSections(r.data.sections);
-      if (r.data.meta) setFooterMeta(r.data.meta);
+      if (r.data.meta) {
+        setFooterMeta(r.data.meta);
+        if (!r.data.meta.contact) {
+          try {
+            const c = await api.get<SiteContent>('/site/contact');
+            const email = c.data.sections?.find(s => s.heading === 'Email')?.content;
+            if (email) setFooterMeta((prev) => ({ ...prev, contact: email }));
+          } catch {}
+        }
+      } else {
+        try {
+          const c = await api.get<SiteContent>('/site/contact');
+          if (c.data.sections) setFooterSections((prev) => (prev.length ? prev : c.data.sections));
+          const email = c.data.sections?.find(s => s.heading === 'Email')?.content;
+          if (email) setFooterMeta((prev) => ({ ...prev, contact: email }));
+        } catch {}
+      }
     }).catch(() => {});
   }, []);
 
