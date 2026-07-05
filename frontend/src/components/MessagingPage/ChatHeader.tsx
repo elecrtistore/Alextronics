@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Menu, Phone, MoreHorizontal, Pencil } from 'lucide-react';
 import { Conversation } from '../../services/chatService';
 import api from '../../services/api';
+import { productSlug } from '../../utils/slug';
 
 export default function ChatHeader({
   conversation,
@@ -47,7 +48,7 @@ export default function ChatHeader({
 
   const handleViewProduct = () => {
     if (conversation.productId) {
-      window.open(`/#/products/${conversation.productId}`, '_blank');
+      window.open(`/#/products/${productSlug(conversation.productName || 'product', conversation.productId)}`, '_blank');
     }
     setMenuOpen(false);
   };

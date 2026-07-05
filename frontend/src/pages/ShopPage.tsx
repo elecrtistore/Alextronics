@@ -8,6 +8,7 @@ import { fetchProducts, updateProduct } from '../services/productService';
 import api from '../services/api';
 import { Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import CustomDropdown from '../components/CustomDropdown';
+import { productSlug } from '../utils/slug';
 
 interface HeroContent { title: string; subtitle: string; body: string; sections: { heading: string; content: string }[]; }
 
@@ -204,7 +205,7 @@ function ShopPage() {
               ))
             ) : (
               filtered.map((product) => (
-                <Link key={product._id} to={`/products/${product._id}`} className="group rounded-2xl bg-white border border-border/60 overflow-hidden block">
+                <Link key={product._id} to={`/products/${productSlug(product.name, product._id)}`} className="group rounded-2xl bg-white border border-border/60 overflow-hidden block">
                   <div className="h-36 flex items-center justify-center bg-slate-50 overflow-hidden">
                     <img src={product.images[0]} alt={product.name} className="max-h-full max-w-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
                   </div>

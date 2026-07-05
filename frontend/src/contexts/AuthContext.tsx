@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   signOut,
+  sendPasswordResetEmail,
   User as FirebaseUser
 } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -19,6 +20,7 @@ interface AuthContextValue {
   signup: (email: string, password: string) => Promise<void>;
   signupWithRole: (email: string, password: string, role: string, adminCode?: string, displayName?: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -143,8 +145,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearStoredRole();
   };
 
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, login, signup, signupWithRole, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, login, signup, signupWithRole, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

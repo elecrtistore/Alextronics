@@ -4,9 +4,11 @@ import { fetchProductById, fetchProducts } from '../services/productService';
 import { Product } from '../types/product';
 import { useInquiry } from '../contexts/InquiryContext';
 import { ChevronLeft, ShoppingCart, MessageCircle, Phone, Package, Shield, Truck } from 'lucide-react';
+import { extractId, productSlug } from '../utils/slug';
 
 function ProductDetailsPage() {
-  const { id } = useParams();
+  const { id: compound } = useParams();
+  const id = compound ? extractId(compound) : undefined;
   const navigate = useNavigate();
   const { addItem } = useInquiry();
   const [product, setProduct] = useState<Product | null>(null);
@@ -128,7 +130,7 @@ function ProductDetailsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <MessageCircle size={16} className="text-emerald-500" />
-                  <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-sm text-soft hover:text-emerald-600 transition">WhatsApp</a>
+                  <a href={`https://wa.me/${(product.sellerWhatsapp || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-sm text-soft hover:text-emerald-600 transition">WhatsApp</a>
                 </div>
               </div>
             </div>
@@ -138,7 +140,7 @@ function ProductDetailsPage() {
                 className="flex-1 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
                 <ShoppingCart size={16} /> Add to Cart
               </button>
-              <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"
+              <a href={`https://wa.me/${(product.sellerWhatsapp || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"
                 className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
                 <MessageCircle size={16} /> WhatsApp
               </a>
@@ -152,7 +154,7 @@ function ProductDetailsPage() {
             <h2 className="text-2xl font-bold text-charcoal mb-8">Related Products</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {related.map((p) => (
-                <Link key={p._id} to={`/products/${p._id}`} className="group rounded-2xl bg-background overflow-hidden animate-lift">
+                <Link key={p._id} to={`/products/${productSlug(p.name, p._id)}`} className="group rounded-2xl bg-background overflow-hidden animate-lift">
                   <div className="aspect-[4/3] overflow-hidden bg-slate-100">
                     <img src={p.images[0]} alt={p.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500" />
                   </div>
@@ -172,7 +174,7 @@ function ProductDetailsPage() {
           <button onClick={() => { addItem(product); navigate('/inquiry-list'); }} className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition flex items-center justify-center gap-2">
             <ShoppingCart size={16} /> Add to Cart
           </button>
-          <a href={`https://wa.me/${product.sellerWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="rounded-full border border-border bg-white px-4 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
+          <a href={`https://wa.me/${(product.sellerWhatsapp || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="rounded-full border border-border bg-white px-4 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
             <MessageCircle size={16} /> Chat
           </a>
         </div>
