@@ -33,7 +33,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
-  const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
+  const isHome = location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
 
   const navLinks = [
@@ -83,7 +83,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'
       }`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/shop" className="flex items-center gap-3">
             {!logoError ? (
               <img src={logoSrc} alt={shopName} className="h-10 w-10 rounded-2xl object-cover shadow-sm" onError={() => setLogoError(true)} />
             ) : (
