@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, MessageCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, Shield, MessageCircle, Star } from 'lucide-react';
 import api from '../services/api';
 
 interface SiteContent {
@@ -48,7 +48,7 @@ function AboutPage() {
               {content.sections.map((section) => (
                 <div key={section.heading} className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
-                    {section.heading === 'Explore' ? <Sparkles size={20} /> : section.heading === 'Inquire' ? <MessageCircle size={20} /> : <Shield size={20} />}
+                    {section.heading === 'Explore' ? <Star size={20} /> : section.heading === 'Inquire' ? <MessageCircle size={20} /> : <Shield size={20} />}
                   </div>
                   <h2 className="text-base font-semibold text-charcoal mb-2">{section.heading}</h2>
                   <p className="text-sm text-slate-600 leading-relaxed">{section.content}</p>
