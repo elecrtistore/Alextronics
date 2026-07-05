@@ -23,79 +23,92 @@ function SignupPage() {
   };
 
   return (
-    <div className="pt-24 min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <UserPlus size={24} className="text-primary" />
+    <div className="min-h-screen bg-slate-50 py-24 px-6">
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 lg:flex lg:items-stretch">
+        <div className="hidden lg:block lg:w-1/2 bg-slate-950 p-16 text-white">
+          <div className="inline-flex items-center gap-3 rounded-3xl bg-white/10 px-4 py-3 text-sm uppercase tracking-[0.3em] text-white/80 mb-8">
+            <UserPlus size={18} />
+            Create account
           </div>
-          <h1 className="text-2xl font-bold text-charcoal">Create account</h1>
-          <p className="mt-2 text-sm text-soft">Join ALEXTRONICS to start inquiring.</p>
+          <h1 className="text-4xl font-bold">Join ALEXTRONICS</h1>
+          <p className="mt-6 text-sm leading-7 text-slate-300">Start inquiring, manage your cart, and connect with sellers directly.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {error && <div className="rounded-xl bg-red-50 border border-red-200 px-5 py-3 text-sm text-red-600">{error}</div>}
-
-          <div>
-            <label className="text-sm font-medium text-charcoal">Full Name</label>
-            <div className="relative mt-2">
-              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-              <input value={form.displayName} onChange={(e) => setForm((p) => ({ ...p, displayName: e.target.value }))} required
-                className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+        <div className="w-full p-10 lg:w-1/2">
+          <div className="text-center mb-8">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary mb-4">
+              <UserPlus size={28} />
             </div>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-charcoal">Email</label>
-            <div className="relative mt-2">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-              <input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required
-                className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
-            </div>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-charcoal">Password</label>
-            <div className="relative mt-2">
-              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-              <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} required
-                className="w-full rounded-xl border border-border bg-white pl-10 pr-10 py-3 text-sm outline-none focus:border-primary transition" />
-              <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-soft hover:text-charcoal transition">
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
+            <h2 className="text-3xl font-semibold text-charcoal">Create account</h2>
+            <p className="mt-2 text-sm text-slate-500">Join ALEXTRONICS to start inquiring.</p>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-charcoal">Role</label>
-            <div className="relative mt-2">
-              <select value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as 'Buyer' | 'Admin' }))}
-                className="w-full appearance-none cursor-pointer rounded-xl border border-border bg-white px-4 py-3 pr-10 text-sm outline-none transition focus:border-primary">
-                <option value="Buyer">Buyer</option>
-                <option value="Admin">Admin</option>
-              </select>
-              <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-soft" />
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <div className="rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">{error}</div>}
 
-          {form.role === 'Admin' && (
             <div>
-              <label className="text-sm font-medium text-charcoal">Admin code</label>
+              <label className="text-sm font-medium text-slate-700">Full Name</label>
               <div className="relative mt-2">
-                <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-                <input type="password" value={form.adminCode} onChange={(e) => setForm((p) => ({ ...p, adminCode: e.target.value }))} required
-                  className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input value={form.displayName} onChange={(e) => setForm((p) => ({ ...p, displayName: e.target.value }))} required
+                  className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
               </div>
             </div>
-          )}
 
-          <button type="submit" disabled={submitting}
-            className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50">
-            {submitting ? 'Creating account...' : 'Create account'}
-          </button>
+            <div>
+              <label className="text-sm font-medium text-slate-700">Email</label>
+              <div className="relative mt-2">
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required
+                  className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
+              </div>
+            </div>
 
-          <p className="text-center text-sm text-soft">
-            Already have an account? <Link to="/login" className="font-semibold text-primary hover:text-primary-hover">Sign in</Link>
-          </p>
-        </form>
+            <div>
+              <label className="text-sm font-medium text-slate-700">Password</label>
+              <div className="relative mt-2">
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} required
+                  className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-700">Role</label>
+              <div className="relative mt-2">
+                <select value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as 'Buyer' | 'Admin' }))}
+                  className="w-full appearance-none cursor-pointer rounded-3xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10">
+                  <option value="Buyer">Buyer</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              </div>
+            </div>
+
+            {form.role === 'Admin' && (
+              <div>
+                <label className="text-sm font-medium text-slate-700">Admin code</label>
+                <div className="relative mt-2">
+                  <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="password" value={form.adminCode} onChange={(e) => setForm((p) => ({ ...p, adminCode: e.target.value }))} required
+                    className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" disabled={submitting}
+              className="w-full rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition disabled:cursor-not-allowed disabled:opacity-60">
+              {submitting ? 'Creating account...' : 'Create account'}
+            </button>
+
+            <p className="text-center text-sm text-slate-500">
+              Already have an account? <Link to="/login" className="font-semibold text-primary hover:text-primary-hover">Sign in</Link>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

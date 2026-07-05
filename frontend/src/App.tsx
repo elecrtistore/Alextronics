@@ -36,6 +36,7 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<ShopPage />} />
+          <Route path="/shop" element={<ShopPage />} />
           <Route path="/products/:id" element={<ProductDetailsPage />} />
           <Route path="/inquiry-list" element={<InquiryListPage />} />
           <Route path="/inquiry" element={<InquiryFormPage />} />

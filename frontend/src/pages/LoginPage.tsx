@@ -28,64 +28,76 @@ function LoginPage() {
   };
 
   return (
-    <div className="pt-24 min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <LogIn size={24} className="text-primary" />
+    <div className="min-h-screen bg-slate-50 py-24 px-6">
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 lg:flex lg:items-stretch">
+        <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-primary to-primary-hover p-16 text-white">
+          <div className="inline-flex items-center gap-3 rounded-3xl bg-white/10 px-4 py-3 text-sm uppercase tracking-[0.3em] text-white/80 mb-8">
+            <LogIn size={18} />
+            Welcome back
           </div>
-          <h1 className="text-2xl font-bold text-charcoal">Sign in</h1>
-          <p className="mt-2 text-sm text-soft">Welcome back to ALEXTRONICS.</p>
+          <h1 className="text-4xl font-bold">Sign in to ALEXTRONICS</h1>
+          <p className="mt-6 text-sm leading-7 text-white/80">Access your inquiry history, message sellers, and continue shopping in a seamless dashboard experience.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {error && <div className="rounded-xl bg-red-50 border border-red-200 px-5 py-3 text-sm text-red-600">{error}</div>}
-
-          <div>
-            <label className="text-sm font-medium text-charcoal">Email</label>
-            <div className="relative mt-2">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+        <div className="w-full p-10 lg:w-1/2">
+          <div className="text-center mb-8">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary mb-4">
+              <LogIn size={28} />
             </div>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-charcoal">Password</label>
-            <div className="relative mt-2">
-              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required
-                className="w-full rounded-xl border border-border bg-white pl-10 pr-10 py-3 text-sm outline-none focus:border-primary transition" />
-              <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-soft hover:text-charcoal transition">
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
+            <h2 className="text-3xl font-semibold text-charcoal">Sign in</h2>
+            <p className="mt-2 text-sm text-slate-500">Welcome back to ALEXTRONICS.</p>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-soft cursor-pointer">
-            <input type="checkbox" checked={adminMode} onChange={(e) => setAdminMode(e.target.checked)} className="rounded border-border text-primary" />
-            Sign in as admin
-          </label>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <div className="rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">{error}</div>}
 
-          {adminMode && (
             <div>
-              <label className="text-sm font-medium text-charcoal">Admin code</label>
+              <label className="text-sm font-medium text-slate-700">Email</label>
               <div className="relative mt-2">
-                <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-                <input type="password" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} required
-                  className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
               </div>
             </div>
-          )}
 
-          <button type="submit" disabled={submitting}
-            className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50">
-            {submitting ? 'Signing in...' : 'Sign in'}
-          </button>
+            <div>
+              <label className="text-sm font-medium text-slate-700">Password</label>
+              <div className="relative mt-2">
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required
+                  className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 pr-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-          <p className="text-center text-sm text-soft">
-            Don't have an account? <Link to="/signup" className="font-semibold text-primary hover:text-primary-hover">Sign up</Link>
-          </p>
-        </form>
+            <label className="flex items-center gap-3 text-sm text-slate-600">
+              <input type="checkbox" checked={adminMode} onChange={(e) => setAdminMode(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" />
+              Sign in as admin
+            </label>
+
+            {adminMode && (
+              <div>
+                <label className="text-sm font-medium text-slate-700">Admin code</label>
+                <div className="relative mt-2">
+                  <Shield size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="password" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} required
+                    className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" disabled={submitting}
+              className="w-full rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition disabled:cursor-not-allowed disabled:opacity-60">
+              {submitting ? 'Signing in...' : 'Sign in'}
+            </button>
+
+            <p className="text-center text-sm text-slate-500">
+              Don't have an account? <Link to="/signup" className="font-semibold text-primary hover:text-primary-hover">Sign up</Link>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

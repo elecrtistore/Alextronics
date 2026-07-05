@@ -89,60 +89,94 @@ function InquiryFormPage() {
   }
 
   return (
-    <div className="pt-24 min-h-screen bg-white">
-      <div className="mx-auto max-w-2xl px-6 py-12">
+    <div className="pt-24 min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-4xl px-6 py-12">
         <button onClick={() => navigate('/inquiry-list')} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
           <ArrowLeft size={16} /> Back to cart
         </button>
-        <h1 className="text-3xl font-bold text-charcoal">Submit inquiry</h1>
-        <p className="mt-2 text-soft text-sm">The seller will contact you directly.</p>
 
-        <form onSubmit={handleSubmit} className="mt-10 space-y-8">
-          {error && <div className="rounded-xl bg-red-50 border border-red-200 px-5 py-3 text-sm text-red-600">{error}</div>}
-
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label className="text-sm font-medium text-charcoal">Full Name</label>
-              <div className="relative mt-2">
-                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-                <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required
-                  className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-charcoal">Phone Number</label>
-              <div className="relative mt-2">
-                <PhoneIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
-                <input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} required
-                  className="w-full rounded-xl border border-border bg-white pl-10 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
-              </div>
-            </div>
+        <div className="rounded-[2rem] bg-white border border-slate-200 p-8 shadow-sm">
+          <div className="mb-8">
+            <p className="text-sm uppercase tracking-[0.3em] text-primary/80">Inquiry request</p>
+            <h1 className="mt-3 text-4xl font-semibold text-charcoal">Submit your inquiry</h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-500">Send your selected products to the seller and start the purchasing conversation instantly.</p>
           </div>
 
-          <div className="rounded-2xl bg-slate-50 p-6 space-y-4">
-            <h2 className="font-semibold text-charcoal">Products ({items.length})</h2>
-            <div className="divide-y divide-border/60">
-              {items.map((item) => (
-                <div key={item.productId} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-charcoal text-sm">{item.name}</p>
-                    <p className="text-xs text-soft">Qty: {item.quantity} &times; KSh {item.price.toLocaleString()}</p>
+          <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {error && <div className="rounded-2xl bg-red-50 border border-red-200 px-5 py-4 text-sm text-red-600">{error}</div>}
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium text-charcoal">Full Name</label>
+                  <div className="relative mt-2">
+                    <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+                    <input
+                      value={form.name}
+                      onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                      required
+                      className="w-full rounded-2xl border border-border bg-white pl-11 pr-4 py-3 text-sm outline-none focus:border-primary transition"
+                    />
                   </div>
-                  <p className="font-semibold text-charcoal text-sm">KSh {(item.price * item.quantity).toLocaleString()}</p>
                 </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between pt-3 border-t border-border/60">
-              <p className="text-sm text-soft">Total</p>
-              <p className="text-xl font-bold text-charcoal">KSh {totalAmount.toLocaleString()}</p>
-            </div>
-          </div>
+                <div>
+                  <label className="text-sm font-medium text-charcoal">Phone Number</label>
+                  <div className="relative mt-2">
+                    <PhoneIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+                    <input
+                      value={form.phone}
+                      onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                      required
+                      className="w-full rounded-2xl border border-border bg-white pl-11 pr-4 py-3 text-sm outline-none focus:border-primary transition"
+                    />
+                  </div>
+                </div>
+              </div>
 
-          <button type="submit" disabled={submitting}
-            className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50">
-            {submitting ? 'Submitting...' : 'Submit inquiry'}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50"
+              >
+                {submitting ? 'Submitting...' : 'Submit inquiry'}
+              </button>
+            </form>
+
+            <aside className="space-y-6 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6">
+              <div>
+                <h2 className="text-sm font-semibold text-charcoal">Order summary</h2>
+                <p className="mt-1 text-sm text-slate-500">Review your selected products before sending.</p>
+              </div>
+
+              <div className="rounded-3xl bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between text-sm text-slate-500">
+                  <span>Products</span>
+                  <span>{items.length}</span>
+                </div>
+                <div className="mt-4 space-y-4">
+                  {items.map((item) => (
+                    <div key={item.productId} className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-medium text-charcoal text-sm truncate">{item.name}</p>
+                        <p className="text-xs text-soft">Qty: {item.quantity} × KSh {item.price.toLocaleString()}</p>
+                      </div>
+                      <p className="text-sm font-semibold text-charcoal">KSh {(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 border-t border-border/80 pt-4 flex items-center justify-between text-sm font-semibold text-charcoal">
+                  <span>Total</span>
+                  <span>KSh {totalAmount.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="rounded-3xl bg-white p-5 text-sm text-slate-500">
+                <p className="font-semibold text-charcoal mb-2">Need help?</p>
+                <p>Submit your inquiry and the seller will follow up with pricing, availability, and delivery details.</p>
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
     </div>
   );

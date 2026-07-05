@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useInquiry } from '../contexts/InquiryContext';
-import { ShoppingCart, Package, MessageCircle, Phone } from 'lucide-react';
+import { ShoppingCart, Package, MessageCircle, Phone, Mail, MapPin } from 'lucide-react';
 import api from '../services/api';
 import CookieConsent from './CookieConsent';
 
@@ -29,7 +29,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       if (r.data.sections) setFooterSections(r.data.sections);
       if (r.data.meta) {
         setFooterMeta(r.data.meta);
-        if (!r.data.meta.contact) {
+        if (!r.data.meta.contact && !r.data.meta.email) {
           try {
             const c = await api.get<SiteContent>('/site/contact');
             const email = c.data.sections?.find(s => s.heading === 'Email')?.content;
@@ -49,7 +49,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
-  const isHome = location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
+  const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
 
   const navLinks = [
@@ -82,7 +82,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       { label: 'About', to: '/about' },
     ] });
 
-    cols.push({ heading: 'Contact', content: footerMeta.contact || 'support@alextronics.example' });
+    cols.push({ heading: 'Contact', content: footerMeta.email || footerMeta.contact || 'support@alextronics.example' });
 
     cols.push({ heading: 'Support', items: [ { label: 'Privacy Policy', to: '/privacy' }, { label: 'Terms of Service', to: '/terms' } ] });
 
@@ -202,30 +202,63 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <footer id="site-footer" className="block bg-white border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 pt-16 pb-28 md:py-16">
-          <div className={`grid gap-10 sm:grid-cols-2 lg:grid-cols-${Math.min(5, footerColumns.length)}`}>
+      <footer id="site-footer" className="bg-slate-950 text-slate-300">
+        <div className="mx-auto max-w-7xl px-6 pt-16 pb-16">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
             {footerColumns.map((col, i) => (
               <div key={i}>
-                <h4 className="text-sm font-semibold text-charcoal uppercase tracking-wider">{col.heading}</h4>
-                {col.content && <p className="mt-3 text-sm text-soft leading-relaxed">{col.content}</p>}
-                {col.items && (
-                  <ul className="mt-3 space-y-2 text-sm text-soft">
-                    {col.items.map((it, idx) => (
-                      <li key={idx}>
-                        {it.to ? <Link to={it.to} className="hover:text-primary transition">{it.label}</Link> : it.label}
-                      </li>
-                    ))}
-                  </ul>
+                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400 mb-5">{col.heading}</h4>
+
+                {col.heading === 'Contact' ? (
+                  <div className="space-y-3 text-sm text-slate-400">
+                    <div className="flex items-start gap-3">
+                      <Phone size={16} className="mt-1 text-primary" />
+                      <a href={`tel:${footerMeta.phone || footerMeta.contact || '0708309429'}`} className="hover:text-white transition">{footerMeta.phone || footerMeta.contact || '0708309429'}</a>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Mail size={16} className="mt-1 text-primary" />
+                      <a href={`mailto:${footerMeta.email || footerMeta.contact || 'alextronics.shop01@gmail.com'}`} className="hover:text-white transition">{footerMeta.email || footerMeta.contact || 'alextronics.shop01@gmail.com'}</a>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <MapPin size={16} className="mt-1 text-primary" />
+                      <span>{footerMeta.address || 'Nairobi, Kenya'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {col.content && <p className="text-sm leading-relaxed text-slate-400">{col.content}</p>}
+                    {i === 0 && (
+                      <div className="mt-5 flex items-center gap-3">
+                        <a href={footerMeta.facebook || '#'} className="text-slate-400 hover:text-white transition">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-800 text-xs font-semibold">f</span>
+                        </a>
+                        <a href={footerMeta.twitter || '#'} className="text-slate-400 hover:text-white transition">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-800 text-xs font-semibold">t</span>
+                        </a>
+                        <a href={footerMeta.instagram || '#'} className="text-slate-400 hover:text-white transition">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-800 text-xs font-semibold">i</span>
+                        </a>
+                      </div>
+                    )}
+                    {col.items && (
+                      <ul className="mt-3 space-y-3 text-sm">
+                        {col.items.map((it, idx) => (
+                          <li key={idx}>
+                            {it.to ? <Link to={it.to} className="hover:text-white transition">{it.label}</Link> : <span className="text-slate-400">{it.label}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
                 )}
               </div>
             ))}
           </div>
-          <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-soft">
+          <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-slate-400">
             <p>&copy; 2026 {shopName}. All rights reserved.</p>
-            <div className="flex gap-4">
-              <Link to="/privacy" className="hover:text-primary transition">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-primary transition">Terms of Service</Link>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-white transition">Terms of Service</Link>
             </div>
           </div>
         </div>

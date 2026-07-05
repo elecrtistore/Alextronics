@@ -20,13 +20,29 @@ function ShopPage() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState(searchParams.get('category') || 'All');
   const [sort, setSort] = useState('Newest');
+  const [availability, setAvailability] = useState<'All' | 'In Stock' | 'Out of Stock'>('All');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
   const [draggedProductId, setDraggedProductId] = useState<string | null>(null);
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [discountTargetId, setDiscountTargetId] = useState<string | null>(null);
-  const [hero, setHero] = useState<HeroContent>({ title: 'Shop Electronics', subtitle: 'Browse our curated collection and add products to your inquiry list.', body: '', sections: [] });
+  const [hero, setHero] = useState<HeroContent>({ title: 'Shop Electronics', subtitle: 'Browse 350+ quality electronic products.', body: '', sections: [] });
+  const priceOptions = [
+    { label: 'All Price', range: [0, 500000] as [number, number] },
+    { label: 'Under KSh 500', range: [0, 500] as [number, number] },
+    { label: 'KSh 500 - KSh 1,000', range: [500, 1000] as [number, number] },
+    { label: 'KSh 1,000 - KSh 2,000', range: [1000, 2000] as [number, number] },
+    { label: 'Above KSh 2,000', range: [2000, 500000] as [number, number] },
+  ];
+  const categories = useMemo(() => ['All', ...Array.from(new Set(products.map((p) => p.category)))], [products]);
+  const categoryCounts = useMemo(
+    () => products.reduce((acc, product) => {
+      acc[product.category] = (acc[product.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>),
+    [products]
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -38,14 +54,10 @@ function ShopPage() {
     if (searchParams.get('category')) setCategory(searchParams.get('category')!);
   }, [searchParams]);
 
-  const categories = useMemo(
-    () => ['All', ...Array.from(new Set(products.map((p) => p.category)))],
-    [products]
-  );
-
   const filtered = useMemo(() => {
     let visible = products
       .filter((p) => category === 'All' || p.category === category)
+      .filter((p) => availability === 'All' || (availability === 'In Stock' ? p.stock > 0 : p.stock <= 0))
       .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()))
       .filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
     if (sort === 'Lowest') return [...visible].sort((a, b) => a.price - b.price);
@@ -89,10 +101,78 @@ function ShopPage() {
         <div className="mx-auto max-w-7xl px-6 py-10">
           <h1 className="text-3xl font-bold text-charcoal">{hero.title}</h1>
           <p className="mt-2 text-soft">{hero.subtitle}</p>
+          <div className="mt-6 grid gap-4 xl:grid-cols-[1.4fr_1.6fr] items-center">
+            <div className="rounded-3xl border border-border bg-slate-50 p-4">
+              <p className="text-sm text-soft uppercase tracking-[0.15em]">Products available</p>
+              <p className="mt-2 text-3xl font-semibold text-charcoal">{products.length}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="rounded-3xl border border-border bg-white p-4 text-center">
+                <p className="text-sm text-soft">Categories</p>
+                <p className="mt-2 text-xl font-semibold text-charcoal">{categories.length - 1}</p>
+              </div>
+              <div className="rounded-3xl border border-border bg-white p-4 text-center">
+                <p className="text-sm text-soft">In stock</p>
+                <p className="mt-2 text-xl font-semibold text-charcoal">{products.filter((p) => p.stock > 0).length}</p>
+              </div>
+              <div className="rounded-3xl border border-border bg-white p-4 text-center">
+                <p className="text-sm text-soft">Out of stock</p>
+                <p className="mt-2 text-xl font-semibold text-charcoal">{products.filter((p) => p.stock <= 0).length}</p>
+              </div>
+              <div className="rounded-3xl border border-border bg-white p-4 text-center">
+                <p className="text-sm text-soft">Showing</p>
+                <p className="mt-2 text-xl font-semibold text-charcoal">{filtered.length}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-6 grid gap-4 xl:grid-cols-[1.4fr_1.6fr] items-end">
+          <div className="relative w-full">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-soft" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products..." className="w-full rounded-full border border-border bg-white pl-12 pr-4 py-3 text-sm outline-none focus:border-primary transition" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-3xl border border-border bg-white px-4 py-3 text-sm outline-none transition focus:border-primary">
+              <option value="All">All Products ({products.length})</option>
+              {categories.slice(1).map((cat) => (
+                <option key={cat} value={cat}>{cat} ({categoryCounts[cat] || 0})</option>
+              ))}
+            </select>
+            <select value={sort} onChange={(e) => setSort(e.target.value)} className="w-full rounded-3xl border border-border bg-white px-4 py-3 text-sm outline-none transition focus:border-primary">
+              <option value="Newest">Newest First</option>
+              <option value="Lowest">Lowest Price</option>
+              <option value="Highest">Highest Price</option>
+              {isAdmin && <option value="Custom">Custom order</option>}
+            </select>
+            <select value={priceOptions.find((option) => option.range[0] === priceRange[0] && option.range[1] === priceRange[1])?.label || 'All Price'} onChange={(e) => {
+              const selected = priceOptions.find((opt) => opt.label === e.target.value);
+              if (selected) setPriceRange(selected.range);
+            }} className="w-full rounded-3xl border border-border bg-white px-4 py-3 text-sm outline-none transition focus:border-primary">
+              {priceOptions.map((option) => (
+                <option key={option.label} value={option.label}>{option.label}</option>
+              ))}
+            </select>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <select value={availability} onChange={(e) => setAvailability(e.target.value as any)} className="w-full rounded-3xl border border-border bg-white px-4 py-3 text-sm outline-none transition focus:border-primary">
+                <option value="All">Any Availability</option>
+                <option value="In Stock">In Stock</option>
+                <option value="Out of Stock">Out of Stock</option>
+              </select>
+              <button onClick={() => {
+                setQuery('');
+                setCategory('All');
+                setSort('Newest');
+                setPriceRange([0, 500000]);
+                setAvailability('All');
+              }} className="rounded-3xl border border-border bg-white px-4 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition">
+                Clear filters
+              </button>
+            </div>
+          </div>
+        </div>
         {/* ─── MOBILE FILTER TOGGLE ─── */}
         <div className="md:hidden mb-6">
           <button onClick={() => setFiltersOpen(!filtersOpen)} className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-charcoal hover:bg-slate-50 transition">
@@ -112,6 +192,26 @@ function ShopPage() {
                   {categories.map((cat) => (
                     <button key={cat} onClick={() => { setCategory(cat); setFiltersOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition ${category === cat ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal'}`}>
                       {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-charcoal mb-3">Price</h4>
+                <div className="space-y-2">
+                  {priceOptions.map((option) => (
+                    <button key={option.label} onClick={() => { setPriceRange(option.range); setFiltersOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition ${priceRange[0] === option.range[0] && priceRange[1] === option.range[1] ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal'}`}>
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-charcoal mb-3">Availability</h4>
+                <div className="space-y-2">
+                  {['All', 'In Stock', 'Out of Stock'].map((option) => (
+                    <button key={option} onClick={() => { setAvailability(option as any); setFiltersOpen(false); }} className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition ${availability === option ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal'}`}>
+                      {option}
                     </button>
                   ))}
                 </div>
