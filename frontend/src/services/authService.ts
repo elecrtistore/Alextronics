@@ -41,3 +41,8 @@ export async function updateProfileDisplayName(idToken: string, displayName: str
   );
   return response.data;
 }
+
+export async function forgotPassword(email: string) {
+  const response = await api.post('/auth/forgot-password', { email });
+  return response.data;
+}

@@ -8,6 +8,7 @@ import InquiryFormPage from './pages/InquiryFormPage';
 import InquirySuccessPage from './pages/InquirySuccessPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -43,6 +44,7 @@ function App() {
           <Route path="/success" element={<InquirySuccessPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/admin" element={<RoleGuard allowed={['Admin']}><AdminDashboardPage /></RoleGuard>} />
           <Route path="/messages" element={<RoleGuard allowed={['Buyer', 'Seller', 'Admin']}><MessagingPage /></RoleGuard>} />
           <Route path="/about" element={<AboutPage />} />

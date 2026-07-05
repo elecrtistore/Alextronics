@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { forgotPassword } from '../services/authService';
 import { LogIn, Mail, Lock, Shield, Eye, EyeOff } from 'lucide-react';
 
 function LoginPage() {
-  const { login, resetPassword } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [adminMode, setAdminMode] = useState(false);
@@ -36,12 +37,10 @@ function LoginPage() {
     e.preventDefault();
     setResetError(''); setResetSubmitting(true);
     try {
-      await resetPassword(resetEmail);
+      await forgotPassword(resetEmail);
       setResetSent(true);
     } catch (err: any) {
-      const msg = err.code === 'auth/user-not-found' ? 'No account found with this email.'
-        : err.code === 'auth/invalid-email' ? 'Invalid email address.'
-        : err.message || 'Failed to send reset email.';
+      const msg = err.response?.data?.message || err.message || 'Failed to send reset email.';
       setResetError(msg);
     } finally { setResetSubmitting(false); }
   };

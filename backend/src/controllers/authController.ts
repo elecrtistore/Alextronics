@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
+import { getAuth } from 'firebase-admin/auth';
 import { getRoleForEmail } from '../utils/userRoles';
 import Admin from '../models/Admin';
+import { sendPasswordResetEmail } from './emailController';
 
 export async function getProfile(req: Request, res: Response) {
   const firebaseUser = res.locals.firebaseUser;
@@ -65,4 +67,30 @@ export async function signup(req: Request, res: Response) {
     displayName: displayName || firebaseUser.name || firebaseUser.email,
     role: assignedRole
   });
+}
+
+export async function forgotPassword(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const actionCodeSettings = {
+      url: `${frontendUrl}/#/reset-password`,
+      handleCodeInApp: true,
+    };
+
+    const resetLink = await getAuth().generatePasswordResetLink(email, actionCodeSettings);
+    await sendPasswordResetEmail(email, resetLink);
+
+    res.json({ message: 'Password reset email sent' });
+  } catch (err: any) {
+    if (err.code === 'auth/user-not-found') {
+      return res.json({ message: 'Password reset email sent' });
+    }
+    console.error('forgotPassword error:', err);
+    res.status(500).json({ message: 'Failed to send password reset email' });
+  }
 }
