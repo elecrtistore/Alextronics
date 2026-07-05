@@ -78,7 +78,7 @@ export async function forgotPassword(req: Request, res: Response) {
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const actionCodeSettings = {
-      url: `${frontendUrl}/#/reset-password`,
+      url: frontendUrl,
       handleCodeInApp: true,
     };
 

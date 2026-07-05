@@ -89,7 +89,15 @@ function buildTemplate(template: string, data: any): string {
   const safeSubject = sanitize(data.subject || 'News from ALEXTRONICS');
 
   const ctaButton = (url: string, label: string) => `
-    <a href="${sanitize(url)}" style="display:inline-block;padding:14px 36px;background:${BRAND.primary};color:#fff;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:0.3px">${sanitize(label)}</a>
+    <!--[if mso]>
+    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${sanitize(url)}" style="height:48px;v-text-anchor:middle;width:260px" arcsize="50%" strokecolor="${BRAND.primary}" fillcolor="${BRAND.primary}">
+      <w:anchorlock/>
+      <center style="color:#ffffff;font-family:'Inter',sans-serif;font-size:16px;font-weight:700">${sanitize(label)}</center>
+    </v:roundrect>
+    <![endif]-->
+    <!--[if !mso]><!-- -->
+    <a href="${sanitize(url)}" style="display:inline-block;padding:14px 40px;background:${BRAND.primary};color:#fff;border-radius:50px;text-decoration:none;font-size:16px;font-weight:700;letter-spacing:0.5px;mso-hide:all">${sanitize(label)}</a>
+    <!--<![endif]-->
   `;
 
   const templates: Record<string, string> = {
@@ -118,21 +126,21 @@ function buildTemplate(template: string, data: any): string {
       ${data.ctaUrl && data.ctaLabel ? `<div style="text-align:center;margin-top:20px">${ctaButton(data.ctaUrl, data.ctaLabel)}</div>` : ''}
     `),
     'password-reset': wrap(`
-      <div style="text-align:center">
-        <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:${BRAND.primaryLight};margin-bottom:16px">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${BRAND.primary}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div style="text-align:center;padding:8px 0 16px">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:20px;background:${BRAND.primaryLight}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${BRAND.primary}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
       </div>
-      <h1 style="font-size:24px;font-weight:800;color:${BRAND.textDark};margin:0 0 8px;text-align:center">Reset Your Password</h1>
-      <p style="font-size:14px;color:${BRAND.textMuted};margin:0 0 24px;text-align:center;line-height:1.6">We received a request to reset the password for your <strong>${BRAND.name}</strong> account associated with <strong style="color:${BRAND.textDark}">${sanitize(data.email || '')}</strong>.</p>
-      <div style="text-align:center;margin:24px 0">${ctaButton(data.resetLink, 'Reset Password')}</div>
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:16px;margin:20px 0">
-        <p style="margin:0;font-size:13px;color:#9a3412;line-height:1.5">
-          <strong>Security notice:</strong> This link expires in 1 hour. If you didn't request this, please ignore this email and your password will remain unchanged.
-        </p>
+      <h1 style="font-size:26px;font-weight:800;color:${BRAND.textDark};margin:0 0 10px;text-align:center;letter-spacing:-0.3px">Reset Your Password</h1>
+      <p style="font-size:15px;color:${BRAND.textMuted};margin:0 0 6px;text-align:center;line-height:1.7">We received a password reset request for your <strong>${BRAND.name}</strong> account.</p>
+      <p style="font-size:15px;color:${BRAND.textMuted};margin:0 0 28px;text-align:center;line-height:1.7">Account: <strong style="color:${BRAND.textDark}">${sanitize(data.email || '')}</strong></p>
+      <div style="text-align:center;margin:28px 0">${ctaButton(data.resetLink, 'Reset Password')}</div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:14px;padding:18px 20px;margin:28px 0 8px">
+        <p style="margin:0 0 6px;font-size:13px;color:#92400e;font-weight:600">Security notice</p>
+        <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6">This password reset link will expire in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email — your password will remain unchanged.</p>
       </div>
-      <p style="font-size:13px;color:${BRAND.textMuted};text-align:center;margin:0">If the button above doesn't work, copy and paste this URL into your browser:</p>
-      <p style="font-size:12px;color:${BRAND.primary};text-align:center;margin:6px 0 0;word-break:break-all">${sanitize(data.resetLink || '')}</p>
+      <p style="font-size:13px;color:${BRAND.textLight};text-align:center;margin:24px 0 0;line-height:1.5">Button not working? Copy and paste this URL into your browser:</p>
+      <p style="font-size:12px;color:${BRAND.primary};text-align:center;margin:4px 0 0;word-break:break-all;line-height:1.5">${sanitize(data.resetLink || '')}</p>
     `),
   };
 
