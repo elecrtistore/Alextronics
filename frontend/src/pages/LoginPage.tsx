@@ -28,7 +28,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-24 px-6">
+    <div className="min-h-screen bg-white py-24 px-6">
       <div className="mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 lg:flex lg:items-stretch">
         <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-primary to-primary-hover p-16 text-white">
           <div className="inline-flex items-center gap-3 rounded-3xl bg-white/10 px-4 py-3 text-sm uppercase tracking-[0.3em] text-white/80 mb-8">

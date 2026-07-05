@@ -38,7 +38,7 @@ export function useConversations() {
       return;
     }
 
-    load(true);
+    load();
 
     const intervalId = window.setInterval(() => {
       if (document.visibilityState === 'visible') {

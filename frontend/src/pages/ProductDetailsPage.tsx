@@ -12,19 +12,34 @@ function ProductDetailsPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!id) return;
+    setError(false);
     fetchProductById(id).then((p) => {
       setProduct(p);
       setSelectedImage(0);
       fetchProducts().then((all) => setRelated(all.filter((r) => r.category === p.category && r._id !== p._id).slice(0, 4))).catch(() => {});
-    }).catch(console.error);
+    }).catch(() => setError(true));
   }, [id]);
+
+  if (error) {
+    return (
+      <div className="pt-0 min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-soft text-lg">Product not found</p>
+          <Link to="/shop" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover transition">
+            <ChevronLeft size={16} /> Back to Shop
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center">
+      <div className="pt-0 min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-soft">Loading...</div>
       </div>
     );
@@ -34,7 +49,7 @@ function ProductDetailsPage() {
   const imageUrl = product.images[selectedImage] ?? product.images[0] ?? '';
 
   return (
-    <div className="pt-20 min-h-screen bg-white pb-28">
+    <div className="pt-0 min-h-screen bg-white pb-28">
       <div className="mx-auto max-w-7xl px-6 py-8">
         <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
           <ChevronLeft size={16} /> Back

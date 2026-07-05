@@ -17,6 +17,7 @@
     "express-validator": "^7.0.1",
     "firebase-admin": "^14.1.0",
     "helmet": "^7.0.0",
+    "iconv-lite": "^0.7.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.0",
     "morgan": "^1.10.0",

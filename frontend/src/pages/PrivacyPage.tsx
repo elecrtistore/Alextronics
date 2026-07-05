@@ -1,6 +1,6 @@
 function PrivacyPage() {
   return (
-    <div className="pt-24 bg-slate-50 min-h-screen">
+    <div className="pt-0 bg-white min-h-screen">
       <section className="bg-slate-950 text-white">
         <div className="mx-auto max-w-7xl px-6 py-20 text-center">
           <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Privacy</p>

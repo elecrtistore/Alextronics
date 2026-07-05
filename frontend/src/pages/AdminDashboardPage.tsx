@@ -582,51 +582,7 @@ function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-charcoal mb-4">Control panel</h2>
-              <div className="space-y-1">
-                {cards.map((card) => (
-                  <button
-                    key={card.id}
-                    onClick={() => setActiveCard(card.id)}
-                    className={`w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
-                      activeCard === card.id ? 'bg-primary/10 text-primary font-semibold' : 'text-soft hover:text-charcoal hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span>{card.icon}</span>
-                      <span>{card.title}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <h2 className="text-sm font-semibold text-charcoal mb-3">Reorder cards</h2>
-              <p className="text-xs text-soft mb-4">Drag to customize the sidebar order.</p>
-              <div className="space-y-2">
-                {cards.map((card) => (
-                  <div
-                    key={card.id}
-                    draggable
-                    onDragStart={(event) => handleDragStart(event, card.id)}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => handleDrop(event, card.id)}
-                    className="rounded-xl border border-border bg-white px-4 py-3 text-sm text-charcoal shadow-sm cursor-grab"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span>{card.icon}</span>
-                      <span>{card.title}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </aside>
-
+        <div>
           <section className="space-y-6">
             {activeCard === 'products' && (
               <div className="space-y-6">

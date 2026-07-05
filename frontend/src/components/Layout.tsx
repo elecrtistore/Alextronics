@@ -49,7 +49,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, [location]);
 
-  const isHome = location.pathname === '/' || location.pathname === '/shop' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
+  const isHome = location.pathname === '/' || location.pathname.endsWith('/Alextronics/') || location.pathname.endsWith('/Alextronics/shop');
   const transparent = isHome && !scrolled;
 
   const navLinks = [
@@ -95,10 +95,8 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'
-      }`}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
+      <header className={`relative z-50 transition-all duration-300 ${transparent ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md shadow-sm'}`}>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 md:px-6 md:py-3">
           <Link to="/shop" className="flex items-center gap-3">
             {!logoError ? (
               <img src={logoSrc} alt={shopName} className="h-10 w-10 rounded-2xl object-cover shadow-sm" onError={() => setLogoError(true)} />
@@ -174,7 +172,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pt-[90px] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-24">{children}</main>
+      <main className="flex-1 pt-0 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-24">{children}</main>
 
       <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-border/80 bg-white/95 backdrop-blur-sm shadow-[0_-10px_20px_rgba(15,23,42,0.08)]" style={{ transform: 'translateZ(0)', willChange: 'transform', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2">
@@ -203,11 +201,11 @@ function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <footer id="site-footer" className="bg-slate-950 text-slate-300">
-        <div className="mx-auto max-w-7xl px-6 pt-16 pb-16">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mx-auto max-w-7xl px-6 pt-8 pb-8">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {footerColumns.map((col, i) => (
               <div key={i}>
-                <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400 mb-5">{col.heading}</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 mb-3">{col.heading}</h4>
 
                 {col.heading === 'Contact' ? (
                   <div className="space-y-3 text-sm text-slate-400">
@@ -254,9 +252,9 @@ function Layout({ children }: { children: React.ReactNode }) {
               </div>
             ))}
           </div>
-          <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-slate-400">
+          <div className="mt-8 border-t border-slate-800 pt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-sm text-slate-400">
             <p>&copy; 2026 {shopName}. All rights reserved.</p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-2">
               <Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link>
               <Link to="/terms" className="hover:text-white transition">Terms of Service</Link>
             </div>

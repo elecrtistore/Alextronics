@@ -8,7 +8,7 @@ function InquirySuccessPage() {
   useEffect(() => { clear(); }, [clear]);
 
   return (
-    <div className="pt-24 bg-slate-50 min-h-screen flex items-center justify-center px-6">
+    <div className="pt-0 bg-white min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-2xl rounded-[2rem] bg-white border border-slate-200 p-10 shadow-sm text-center">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100">
           <CheckCircle size={40} className="text-emerald-600" />

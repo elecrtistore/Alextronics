@@ -32,7 +32,7 @@ function RoleGuard({ allowed, children }: { allowed: UserRole[]; children: JSX.E
 
 function App() {
   return (
-    <div className="min-h-screen bg-background text-charcoal">
+    <div className="min-h-screen bg-white text-charcoal">
       <Layout>
         <Routes>
           <Route path="/" element={<ShopPage />} />

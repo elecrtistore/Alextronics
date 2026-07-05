@@ -35,7 +35,7 @@ function InquiryListPage() {
   };
 
   return (
-    <div className="pt-24 min-h-screen bg-slate-50">
+    <div className="pt-0 min-h-screen bg-white">
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="rounded-[2rem] bg-white border border-slate-200 p-8 shadow-sm">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

@@ -64,7 +64,7 @@ function InquiryFormPage() {
 
   if (items.length === 0) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center px-6">
+      <div className="pt-0 min-h-screen flex items-center justify-center px-6">
         <div className="text-center space-y-4">
           <ShoppingBag size={48} className="text-soft mx-auto" />
           <h1 className="text-2xl font-bold text-charcoal">No items to submit</h1>
@@ -77,7 +77,7 @@ function InquiryFormPage() {
 
   if (!authLoading && !user) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center px-6">
+      <div className="pt-0 min-h-screen flex items-center justify-center px-6">
         <div className="text-center space-y-4">
           <ShoppingBag size={48} className="text-soft mx-auto" />
           <h1 className="text-2xl font-bold text-charcoal">Please sign in</h1>
@@ -89,7 +89,7 @@ function InquiryFormPage() {
   }
 
   return (
-    <div className="pt-24 min-h-screen bg-slate-50">
+    <div className="pt-0 min-h-screen bg-white">
       <div className="mx-auto max-w-4xl px-6 py-12">
         <button onClick={() => navigate('/inquiry-list')} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
           <ArrowLeft size={16} /> Back to cart
@@ -102,7 +102,7 @@ function InquiryFormPage() {
             <p className="mt-2 max-w-2xl text-sm text-slate-500">Send your selected products to the seller and start the purchasing conversation instantly.</p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="grid gap-8">
             <form onSubmit={handleSubmit} className="space-y-8">
               {error && <div className="rounded-2xl bg-red-50 border border-red-200 px-5 py-4 text-sm text-red-600">{error}</div>}
 
