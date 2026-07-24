@@ -17,6 +17,9 @@ function ProductDetailsPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [error, setError] = useState(false);
 
+  const waNumber = (product?.sellerWhatsapp || '').replace(/[^0-9]/g, '');
+  const hasWa = waNumber.length > 3;
+
   useEffect(() => {
     if (!id) return;
     setError(false);
@@ -140,7 +143,11 @@ function ProductDetailsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <MessageCircle size={16} className="text-emerald-500" />
-                  <a href={`https://wa.me/${(product.sellerWhatsapp || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="text-sm text-soft hover:text-emerald-600 transition">WhatsApp</a>
+                  {hasWa ? (
+                    <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noreferrer" className="text-sm text-soft hover:text-emerald-600 transition">WhatsApp</a>
+                  ) : (
+                    <span className="text-sm text-slate-400">Not available</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -150,10 +157,17 @@ function ProductDetailsPage() {
                 className="flex-1 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white hover:bg-primary-hover transition shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
                 <ShoppingCart size={16} /> Add to Cart
               </button>
-              <a href={`https://wa.me/${(product.sellerWhatsapp || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer"
-                className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
-                <MessageCircle size={16} /> WhatsApp
-              </a>
+              {hasWa ? (
+                <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noreferrer"
+                  className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
+                  <MessageCircle size={16} /> WhatsApp
+                </a>
+              ) : (
+                <button disabled
+                  className="rounded-full border border-border px-6 py-3.5 text-sm font-semibold text-slate-300 cursor-not-allowed flex items-center justify-center gap-2">
+                  <MessageCircle size={16} /> WhatsApp
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -184,9 +198,15 @@ function ProductDetailsPage() {
           <button onClick={() => { addItem(product); navigate('/inquiry-list'); }} className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover transition flex items-center justify-center gap-2">
             <ShoppingCart size={16} /> Add to Cart
           </button>
-          <a href={`https://wa.me/${(product.sellerWhatsapp || '').replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="rounded-full border border-border bg-white px-4 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
-            <MessageCircle size={16} /> Chat
-          </a>
+          {hasWa ? (
+            <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noreferrer" className="rounded-full border border-border bg-white px-4 py-3 text-sm font-semibold text-charcoal hover:bg-slate-50 transition flex items-center justify-center gap-2">
+              <MessageCircle size={16} /> Chat
+            </a>
+          ) : (
+            <button disabled className="rounded-full border border-border bg-white px-4 py-3 text-sm font-semibold text-slate-300 cursor-not-allowed flex items-center justify-center gap-2">
+              <MessageCircle size={16} /> Chat
+            </button>
+          )}
         </div>
       </div>
     </div>
