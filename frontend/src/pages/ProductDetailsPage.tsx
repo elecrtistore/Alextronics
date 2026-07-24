@@ -56,7 +56,7 @@ function ProductDetailsPage() {
   return (
     <div className="pt-0 min-h-screen bg-white pb-28">
       <div className="mx-auto max-w-7xl px-6 py-8">
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
+        <button onClick={() => navigate('/shop')} className="inline-flex items-center gap-2 text-sm text-soft hover:text-charcoal transition mb-8">
           <ChevronLeft size={16} /> Back
         </button>
 
