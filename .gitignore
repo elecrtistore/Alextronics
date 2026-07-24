@@ -6,3 +6,4 @@ firebase-service-account.json
 serviceAccountKey.json
 .DS_Store
 *.log
+nul
