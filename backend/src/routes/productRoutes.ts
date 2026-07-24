@@ -6,6 +6,7 @@ import { adminGuard } from '../middleware/adminGuard';
 const router = Router();
 
 router.get('/', productController.getProducts);
+router.get('/share/:shareId', productController.getProductByShareId);
 router.get('/:id', productController.getProductById);
 router.post('/normalize-stock', validateFirebaseToken, adminGuard, productController.normalizeExistingProductStock);
 router.post('/import', validateFirebaseToken, adminGuard, productController.importProducts);

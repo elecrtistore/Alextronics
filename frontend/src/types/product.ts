@@ -13,5 +13,6 @@ export interface Product {
   sellerWhatsapp: string;
   featured: boolean;
   specifications: Record<string, string>;
+  shareId?: string;
   createdAt: string;
 }

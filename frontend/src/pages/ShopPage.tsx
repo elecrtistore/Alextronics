@@ -6,9 +6,10 @@ import { useInquiry } from '../contexts/InquiryContext';
 import { Product } from '../types/product';
 import { fetchProducts, updateProduct } from '../services/productService';
 import api from '../services/api';
-import { Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Search, SlidersHorizontal, ChevronDown, MoreHorizontal } from 'lucide-react';
 import CustomDropdown from '../components/CustomDropdown';
 import { productSlug } from '../utils/slug';
+import { handleShare } from '../utils/share';
 
 interface HeroContent { title: string; subtitle: string; body: string; sections: { heading: string; content: string }[]; }
 
@@ -31,6 +32,7 @@ function ShopPage() {
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [discountTargetId, setDiscountTargetId] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
+  const [shareMenuId, setShareMenuId] = useState<string | null>(null);
   const [hero, setHero] = useState<HeroContent>({ title: 'Shop Electronics', subtitle: 'Browse 350+ quality electronic products.', body: '', sections: [] });
   const priceOptions = [
     { label: 'All Price', range: [0, 500000] as [number, number] },
@@ -75,6 +77,13 @@ function ShopPage() {
     fetchProducts().then(setProducts).catch(console.error).finally(() => setLoading(false));
     api.get('/site/hero').then((res) => { if (res.data.title) setHero(res.data); }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!shareMenuId) return;
+    const close = () => setShareMenuId(null);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [shareMenuId]);
 
   const filtered = useMemo(() => {
     let visible = products
@@ -204,27 +213,50 @@ function ShopPage() {
                 </div>
               ))
             ) : (
-              filtered.map((product) => (
-                <Link key={product._id} to={`/products/${productSlug(product.name, product._id)}`} className="group rounded-2xl bg-white border border-border/60 overflow-hidden block">
-                  <div className="h-36 flex items-center justify-center bg-slate-50 overflow-hidden">
-                    <img src={product.images[0]} alt={product.name} className="max-h-full max-w-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
+              filtered.map((product) => {
+                const shareId = product.shareId || product._id;
+                const menuOpen = shareMenuId === product._id;
+                return (
+                  <div key={product._id} className="relative rounded-2xl bg-white border border-border/60 overflow-hidden">
+                    <Link to={`/products/${productSlug(product.name, product._id)}`} className="group block">
+                      <div className="h-36 flex items-center justify-center bg-slate-50 overflow-hidden">
+                        <img src={product.images[0]} alt={product.name} className="max-h-full max-w-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
+                      </div>
+                      <div className="p-4 space-y-1">
+                        <p className="text-xs font-medium text-primary uppercase tracking-wider">{product.brand}</p>
+                        <h3 className="font-semibold text-charcoal text-sm truncate">{product.name}</h3>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-lg font-bold text-charcoal">KSh {product.price.toLocaleString()}</span>
+                          <button
+                            onClick={(e) => { e.preventDefault(); handleAddToCart(product); }}
+                            disabled={addingProductId === product._id}
+                            className="rounded-full bg-[#0f2b55] px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+                          >
+                            {addingProductId === product._id ? 'Adding...' : 'Add to cart'}
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShareMenuId(menuOpen ? null : product._id); }}
+                      className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-slate-500 hover:bg-white hover:text-charcoal shadow-sm transition"
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                    {menuOpen && (
+                      <div className="absolute top-10 right-2 z-50 w-40 rounded-xl border border-border bg-white py-1 shadow-lg">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShareMenuId(null); handleShare(shareId, product.name); }}
+                          className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-charcoal hover:bg-slate-50 transition"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                          Share this
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <div className="p-4 space-y-1">
-                    <p className="text-xs font-medium text-primary uppercase tracking-wider">{product.brand}</p>
-                    <h3 className="font-semibold text-charcoal text-sm truncate">{product.name}</h3>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-lg font-bold text-charcoal">KSh {product.price.toLocaleString()}</span>
-                      <button
-                        onClick={(e) => { e.preventDefault(); handleAddToCart(product); }}
-                        disabled={addingProductId === product._id}
-                        className="rounded-full bg-[#0f2b55] px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-400"
-                      >
-                        {addingProductId === product._id ? 'Adding...' : 'Add to cart'}
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              ))
+                );
+              })
             )}
           </div>
         </div>

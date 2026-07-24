@@ -3,8 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById, fetchProducts } from '../services/productService';
 import { Product } from '../types/product';
 import { useInquiry } from '../contexts/InquiryContext';
-import { ChevronLeft, ShoppingCart, MessageCircle, Phone, Package, Shield, Truck } from 'lucide-react';
+import { ChevronLeft, ShoppingCart, MessageCircle, Phone, Package, Shield, Truck, MoreHorizontal } from 'lucide-react';
 import { extractId, productSlug } from '../utils/slug';
+import { handleShare } from '../utils/share';
 
 function ProductDetailsPage() {
   const { id: compound } = useParams();
@@ -82,7 +83,16 @@ function ProductDetailsPage() {
           {/* DETAILS */}
           <div className="lg:sticky lg:top-28 lg:self-start space-y-8">
             <div className="space-y-4">
-              <p className="text-sm font-medium text-primary uppercase tracking-wider">{product.brand} &middot; {product.category}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-primary uppercase tracking-wider">{product.brand} &middot; {product.category}</p>
+                <button
+                  onClick={() => handleShare(product.shareId || product._id, product.name)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-charcoal transition"
+                  title="Share product"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
+              </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-charcoal leading-tight">{product.name}</h1>
               <div className="flex items-center gap-3">
                 {discounted ? (

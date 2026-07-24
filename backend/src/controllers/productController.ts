@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import Product from '../models/Product';
+import Product, { generateShareId } from '../models/Product';
 import Category from '../models/Category';
 
 const ALLOWED_FIELDS = ['name', 'description', 'images', 'brand', 'category', 'price', 'discount', 'stock', 'sellerName', 'sellerPhone', 'sellerWhatsapp', 'featured', 'specifications'];
@@ -182,6 +182,13 @@ function buildProductPayload(row: Record<string, string>, index: number) {
 
 export async function getProducts(req: Request, res: Response) {
   const products = await Product.find().sort({ createdAt: -1 });
+  const needsBackfill = products.filter((p) => !p.shareId);
+  if (needsBackfill.length > 0) {
+    for (const p of needsBackfill) {
+      p.shareId = generateShareId();
+      await p.save();
+    }
+  }
   res.json(products.map(sanitizeProduct));
 }
 
@@ -197,6 +204,10 @@ export async function normalizeExistingProductStock(req: Request, res: Response)
 export async function getProductById(req: Request, res: Response) {
   const product = await Product.findById(req.params.id);
   if (!product) return res.status(404).json({ message: 'Product not found' });
+  if (!product.shareId) {
+    product.shareId = generateShareId();
+    await product.save();
+  }
   res.json(sanitizeProduct(product));
 }
 
@@ -323,4 +334,78 @@ export async function deleteProduct(req: Request, res: Response) {
   const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) return res.status(404).json({ message: 'Product not found' });
   res.status(204).end();
+}
+
+function htmlEscape(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+export async function getProductByShareId(req: Request, res: Response) {
+  try {
+    const { shareId } = req.params;
+    let product = await Product.findOne({ shareId: shareId.toUpperCase() });
+    if (!product) {
+      const fallbackUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/shop`;
+      return res.status(404).send(`<!DOCTYPE html><html><head><title>Product not found | ALEXTRONICS</title><meta property="og:title" content="Product not found"><meta name="twitter:card" content="summary"><meta http-equiv="refresh" content="0;url=${htmlEscape(fallbackUrl)}"></head><body><script>window.location.href="${htmlEscape(fallbackUrl)}"</script></body></html>`);
+    }
+
+    if (!product.shareId) {
+      product.shareId = generateShareId();
+      await product.save();
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const productUrl = `${frontendUrl}/#/products/${product._id}`;
+    const imageUrl = product.images?.[0] || '';
+    const displayPrice = product.discount
+      ? `KSh ${Math.round(product.price * (1 - product.discount / 100)).toLocaleString()}`
+      : `KSh ${product.price.toLocaleString()}`;
+    const ogTitle = `${product.name} - ${displayPrice}`;
+    const ogDesc = product.brand ? `${product.brand} — ${(product.description || '').slice(0, 120)}`.trim() : (product.description || '').slice(0, 140);
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(ogTitle)} | ALEXTRONICS</title>
+  <meta property="og:site_name" content="ALEXTRONICS">
+  <meta property="og:title" content="${htmlEscape(ogTitle)}">
+  <meta property="og:description" content="${htmlEscape(ogDesc)}">
+  <meta property="og:image" content="${htmlEscape(imageUrl)}">
+  <meta property="og:url" content="${htmlEscape(productUrl)}">
+  <meta property="og:type" content="product">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${htmlEscape(ogTitle)}">
+  <meta name="twitter:description" content="${htmlEscape(ogDesc)}">
+  <meta name="twitter:image" content="${htmlEscape(imageUrl)}">
+  <meta http-equiv="refresh" content="0;url=${htmlEscape(productUrl)}">
+  <style>
+    body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{background:#fff;border-radius:24px;padding:40px;max-width:420px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+    .card img{width:100%;max-height:240px;object-fit:contain;border-radius:16px;background:#f8fafc;margin-bottom:20px}
+    .card h1{font-size:20px;font-weight:700;color:#111827;margin:0 0 4px}
+    .card .price{font-size:24px;font-weight:800;color:#111827;margin:8px 0}
+    .card .brand{font-size:14px;color:#6b7280;margin:0 0 16px}
+    .card a{display:inline-block;padding:12px 32px;background:#1E3A5F;color:#fff;border-radius:50px;text-decoration:none;font-size:14px;font-weight:600;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="${htmlEscape(imageUrl)}" alt="${htmlEscape(product.name)}">
+    <p class="brand">${htmlEscape(product.brand)}</p>
+    <h1>${htmlEscape(product.name)}</h1>
+    <p class="price">${htmlEscape(displayPrice)}</p>
+    <a href="${htmlEscape(productUrl)}">View Product</a>
+  </div>
+  <script>window.location.href="${htmlEscape(productUrl)}"</script>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (err) {
+    console.error('share endpoint error:', err);
+    res.status(500).send('Server error');
+  }
 }
